@@ -4,56 +4,75 @@
  */
 
 class InvoiceManager {
-    constructor() {
-        this.invoices = JSON.parse(localStorage.getItem('hpro_invoices')) || [];
+  constructor() {
+    this.invoices = JSON.parse(localStorage.getItem('hpro_invoices')) || [];
+  }
+
+  addInvoice(invoice) {
+    // Validaciones básicas
+    if (!invoice.concept || !invoice.base) return false;
+
+    const lastInvoice = this.invoices[this.invoices.length - 1];
+    const lastHash = lastInvoice ? lastInvoice.hash : 'O0000000000000000000000000000000';
+
+    const newInvoice = {
+      id: Date.now(),
+      date: invoice.date || new Date().toISOString().split('T')[0],
+      concept: invoice.concept,
+      base: parseFloat(invoice.base),
+      ivaRate: invoice.ivaRate || 0.21,
+      type: invoice.type || 'out', // 'out' (ingreso), 'in' (gasto)
+      category: invoice.category || 'general', // 'general', 'rent', 'professional', 'payroll'
+      lastHash: lastHash,
+      hash: '' // Se calculará abajo
+    };
+
+    newInvoice.hash = this._generateHash(newInvoice);
+
+    this.invoices.push(newInvoice);
+    this.save();
+    return newInvoice;
+  }
+
+  _generateHash(inv) {
+    const data = `${inv.lastHash}|${inv.date}|${inv.concept}|${inv.base}|${inv.type}`;
+    // Simulación de hash SHA-256 para entorno web ligero
+    let hash = 0;
+    for (let i = 0; i < data.length; i++) {
+      const char = data.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return 'VF' + Math.abs(hash).toString(16).padStart(30, '0');
+  }
+
+  getInvoicesByType(type) {
+    return this.invoices.filter(inv => inv.type === type);
+  }
+
+  getInvoicesByCategory(category) {
+    return this.invoices.filter(inv => inv.category === category);
+  }
+
+  deleteInvoice(id) {
+    this.invoices = this.invoices.filter(inv => inv.id !== id);
+    this.save();
+  }
+
+  save() {
+    localStorage.setItem('hpro_invoices', JSON.stringify(this.invoices));
+  }
+
+  renderList(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (this.invoices.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No hay facturas registradas.</p>';
+      return;
     }
 
-    addInvoice(invoice) {
-        // Validaciones básicas
-        if (!invoice.concept || !invoice.base) return false;
-
-        const newInvoice = {
-            id: Date.now(),
-            date: invoice.date || new Date().toISOString().split('T')[0],
-            concept: invoice.concept,
-            base: parseFloat(invoice.base),
-            ivaRate: invoice.ivaRate || 0.21,
-            type: invoice.type || 'out', // 'out' (ingreso), 'in' (gasto)
-            category: invoice.category || 'general' // 'general', 'rent', 'professional', 'payroll'
-        };
-
-        this.invoices.push(newInvoice);
-        this.save();
-        return newInvoice;
-    }
-
-    getInvoicesByType(type) {
-        return this.invoices.filter(inv => inv.type === type);
-    }
-
-    getInvoicesByCategory(category) {
-        return this.invoices.filter(inv => inv.category === category);
-    }
-
-    deleteInvoice(id) {
-        this.invoices = this.invoices.filter(inv => inv.id !== id);
-        this.save();
-    }
-
-    save() {
-        localStorage.setItem('hpro_invoices', JSON.stringify(this.invoices));
-    }
-
-    renderList(containerId) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-
-        if (this.invoices.length === 0) {
-            container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No hay facturas registradas.</p>';
-            return;
-        }
-
-        container.innerHTML = `
+    container.innerHTML = `
       <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
         <thead>
           <tr style="text-align: left; color: var(--text-muted); border-bottom: 1px solid var(--border);">
@@ -77,7 +96,7 @@ class InvoiceManager {
         </tbody>
       </table>
     `;
-    }
+  }
 }
 
 export default new InvoiceManager();

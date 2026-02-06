@@ -1,0 +1,12 @@
+file:///home/david-ramos/SaaS-Factory/FISCAL%20HACIENDA/src/components/InvoiceManager.js:8
+    this.invoices = JSON.parse(localStorage.getItem('hpro_invoices')) || [];
+                               ^
+
+ReferenceError: localStorage is not defined
+    at new InvoiceManager (file:///home/david-ramos/SaaS-Factory/FISCAL%20HACIENDA/src/components/InvoiceManager.js:8:32)
+    at file:///home/david-ramos/SaaS-Factory/FISCAL%20HACIENDA/src/components/InvoiceManager.js:102:16
+    at ModuleJob.run (node:internal/modules/esm/module_job:413:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:660:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.13.0

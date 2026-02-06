@@ -12,12 +12,17 @@ class Facturador {
             direccion: "Domicilio Fiscal Completo",
             iban: "ES00 0000 0000 0000 0000 0000",
             certificados: [], // [{id, nombre, rol, file}]
-            certSeleccionado: null
+            certSeleccionado: null,
+            configurado: false
         };
         this.serie = "2026-SL";
     }
 
     setEmisor(datos) {
+        // Si se están guardando datos base (nombre/nif), marcamos como configurado
+        if (datos.nombre || datos.nif) {
+            datos.configurado = true;
+        }
         this.emisor = { ...this.emisor, ...datos };
         localStorage.setItem('hpro_emisor_data', JSON.stringify(this.emisor));
     }
@@ -136,6 +141,14 @@ class Facturador {
     addCertificado(cert) {
         this.emisor.certificados.push(cert);
         if (!this.emisor.certSeleccionado) this.emisor.certSeleccionado = cert;
+        this._save();
+    }
+
+    removeCertificado(id) {
+        this.emisor.certificados = this.emisor.certificados.filter(c => c.id != id);
+        if (this.emisor.certSeleccionado && this.emisor.certSeleccionado.id == id) {
+            this.emisor.certSeleccionado = this.emisor.certificados[0] || null;
+        }
         this._save();
     }
 }

@@ -13,9 +13,11 @@ class ApiService {
             throw new Error("Suscripción Inactiva: El servicio de sincronización requiere una cuota mensual activa.");
         }
 
-        console.log("📤 Sincronizando blob cifrado con SaaS Factory...", encryptedBlob);
+        console.log("📤 Sincronizando blob cifrado con SaaS Factory...");
 
-        // Simulación de llamada al backend PostgreSQL
+        // Simulación: Guardamos en el backend de SaaS Factory
+        localStorage.setItem('hpro_remote_sync_mock', encryptedBlob);
+
         return new Promise((resolve) => {
             setTimeout(() => {
                 resolve({ status: "success", timestamp: new Date().toISOString() });
@@ -23,10 +25,19 @@ class ApiService {
         });
     }
 
-    async fetchRemoteInvoices() {
-        console.log("📥 Descargando actualizaciones cifradas desde el servidor...");
-        // Simulación: devuelve null si no hay cambios, o un blob si los hay
-        return null;
+    async fetchRemoteData() {
+        if (!this.isSubscribed) return null;
+
+        console.log("📥 Descargando actualizaciones cifradas desde SaaS Factory...");
+
+        // Simulación: Recuperamos el último blob guardado
+        const remoteBlob = localStorage.getItem('hpro_remote_sync_mock');
+
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(remoteBlob || null);
+            }, 1000);
+        });
     }
 
     setSubscriptionStatus(status) {

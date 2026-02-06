@@ -27,6 +27,10 @@
                 <div class="glass-card" style="padding: 12px 24px; display: flex; align-items: center; gap: 12px;">
                     <span class="tax-badge done" id="user-display">Usuario: Invitado</span>
                     <span class="tax-badge pending" id="sync-status">Sync: Offline</span>
+                    <button id="manual-sync-btn" title="Sincronizar con SaaS Factory"
+                        style="background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); color: white; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; font-size: 1.2rem;">
+                        🔄
+                    </button>
                 </div>
             </div>
         </header>
@@ -63,33 +67,46 @@
                         <p style="font-size: 0.8rem; color: var(--text-muted);">Configuración Emisor (Tus Datos)</p>
                         <div id="emisor-form"
                             style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                            <input type="text" id="emi-nombre" placeholder="Nombre SL / Razón Social"
-                                style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
-                            <input type="text" id="emi-nif" placeholder="NIF"
-                                style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
-                            <input type="text" id="emi-direccion" placeholder="Domicilio Fiscal"
-                                style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
-                            <div style="display: flex; gap: 8px; align-items: center;">
-                                <label
-                                    style="font-size: 0.7rem; color: var(--text-muted); flex: 1;">Certificados:</label>
-                                <select id="cert-selector"
-                                    style="font-size: 0.65rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; border-radius: 4px; padding: 2px;">
-                                    <option value="">Ninguno</option>
-                                </select>
-                            </div>
-                            <input type="file" id="cert-file" style="display: none;">
-                            <button type="button" onclick="document.getElementById('cert-file').click()"
-                                class="btn-primary"
-                                style="font-size: 0.7rem; padding: 4px; background: rgba(148, 163, 184, 0.1);">Añadir
-                                Certificado</button>
-                            <button type="button" id="save-advanced" class="btn-primary"
-                                style="font-size: 0.7rem; padding: 4px;">Guardar Configuración</button>
-                            <div style="display: flex; gap: 8px;">
+                            <div id="emisor-base-data" style="display: flex; flex-direction: column; gap: 8px;">
+                                <input type="text" id="emi-nombre" placeholder="Nombre SL / Razón Social"
+                                    style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
+                                <input type="text" id="emi-nif" placeholder="NIF"
+                                    style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
+                                <input type="text" id="emi-direccion" placeholder="Domicilio Fiscal"
+                                    style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
                                 <button type="button" id="save-emisor" class="btn-primary"
-                                    style="flex: 2; font-size: 0.7rem; padding: 4px;">Guardar Emisor</button>
-                                <button type="button" id="reset-data" class="btn-primary"
-                                    style="flex: 1; font-size: 0.7rem; padding: 4px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">Reset</button>
+                                    style="font-size: 0.7rem; padding: 4px; background: #6366f1;">Registrar Licencia de
+                                    Empresa</button>
                             </div>
+
+                            <div id="emisor-advanced-data"
+                                style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px;">
+                                <p style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px;">Datos de
+                                    Pago y Certificados (Editables)</p>
+                                <input type="text" id="emi-iban" placeholder="IBAN (ES00...)"
+                                    style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <label
+                                        style="font-size: 0.7rem; color: var(--text-muted); flex: 1;">Certificados:</label>
+                                    <select id="cert-selector"
+                                        style="font-size: 0.65rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; border-radius: 4px; padding: 2px;">
+                                        <option value="">Ninguno</option>
+                                    </select>
+                                </div>
+                                <input type="file" id="cert-file" style="display: none;">
+                                <div style="display: flex; gap: 8px;">
+                                    <button type="button" onclick="document.getElementById('cert-file').click()"
+                                        class="btn-primary"
+                                        style="flex: 1; font-size: 0.7rem; padding: 4px; background: rgba(148, 163, 184, 0.1);">+
+                                        Cert.</button>
+                                    <button type="button" id="save-advanced" class="btn-primary"
+                                        style="flex: 1; font-size: 0.7rem; padding: 4px;">Guardar Banco</button>
+                                </div>
+                            </div>
+
+                            <button type="button" id="reset-data" class="btn-primary"
+                                style="font-size: 0.7rem; padding: 4px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171; margin-top: 5px;">Factory
+                                Reset</button>
                         </div>
                     </div>
                     <form id="factura-form" style="display: flex; flex-direction: column; gap: 12px;">
@@ -163,9 +180,12 @@
         import auth from './src/utils/AuthService.js';
         import cryptoService from './src/utils/CryptoService.js';
         import apiService from './src/utils/ApiService.js';
+        import facturador from './src/components/Facturador.js';
+        import signer from './src/utils/DigitalSigner.js';
+        import emailService from './src/utils/EmailService.js';
 
         const appContainer = document.getElementById('app');
-        let currentPassword = ''; // Almacenamos temporalmente para el cifrado Zero-Knowledge
+        let currentPassword = '';
 
         const showLogin = () => {
             appContainer.innerHTML = `
@@ -179,8 +199,14 @@
                         <form id="login-form" style="display: flex; flex-direction: column; gap: 16px;">
                             <input type="text" id="username" placeholder="Usuario / Empresa" required
                                 style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: white; width: 100%;">
-                            <input type="password" id="password" placeholder="Contraseña de Acceso" required
-                                style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: white; width: 100%;">
+                            <div style="position: relative; width: 100%;">
+                                <input type="password" id="password" placeholder="Contraseña de Acceso" required
+                                    style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: white; width: 100%; padding-right: 40px;">
+                                <button type="button" id="toggle-password" 
+                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; padding: 5px;">
+                                    👁️
+                                </button>
+                            </div>
                             <button type="submit" class="btn-primary" style="margin-top: 10px;">Acceder al Dashboard</button>
                         </form>
                         <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 20px;">
@@ -190,16 +216,50 @@
                 </div>
             `;
 
-            document.getElementById('login-form').onsubmit = (e) => {
+            document.getElementById('login-form').onsubmit = async (e) => {
                 e.preventDefault();
                 const user = document.getElementById('username').value;
                 const pass = document.getElementById('password').value;
+
+                const loginBtn = e.target.querySelector('button[type="submit"]');
+                loginBtn.disabled = true;
+                loginBtn.innerText = "⏳ Verificando...";
+
                 if (auth.login(user, pass)) {
                     currentPassword = pass;
+
+                    // Intentamos recuperar datos remotos (Sincronización Multi-dispositivo)
+                    try {
+                        const encryptedData = await apiService.fetchRemoteData();
+                        if (encryptedData) {
+                            const decrypted = await cryptoService.decrypt(encryptedData, pass);
+                            if (decrypted) {
+                                // Restauramos estado si hay datos remotos
+                                if (decrypted.facturas) facturador.facturas = decrypted.facturas;
+                                if (decrypted.gastos) invoiceManager.invoices = decrypted.gastos;
+                                facturador._save();
+                                invoiceManager.save();
+                                alert("✅ Datos sincronizados correctamente desde SaaS Factory.");
+                            }
+                        }
+                    } catch (err) {
+                        console.warn("No se han podido recuperar datos remotos:", err);
+                    }
+
                     initDashboard();
                 } else {
                     alert("⚠️ Error: El usuario o la contraseña no son válidos (mín. 4 caracteres).");
+                    loginBtn.disabled = false;
+                    loginBtn.innerText = "Acceder al Dashboard";
                 }
+            };
+
+            const toggleBtn = document.getElementById('toggle-password');
+            const passInput = document.getElementById('password');
+            toggleBtn.onclick = () => {
+                const isPass = passInput.type === 'password';
+                passInput.type = isPass ? 'text' : 'password';
+                toggleBtn.innerText = isPass ? '🙈' : '👁️';
             };
         };
 
@@ -283,19 +343,43 @@
             modal.onclick = () => document.body.removeChild(modal);
 
             const content = document.createElement('div');
-            content.style = "background:white; color:black; width:90%; max-width:800px; max-height:90%; overflow-y:auto; border-radius:12px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);";
+            content.style = "background:white; color:black; width:90%; max-width:820px; max-height:90%; overflow-y:auto; border-radius:12px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); position: relative;";
             content.onclick = (e) => e.stopPropagation();
+
             content.innerHTML = `
-                <div style="padding:20px; display:flex; justify-content:flex-end;">
+                <div style="padding:20px; display:flex; justify-content:space-between; align-items:center; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                  <h3 style="margin:0; font-size:1rem;">Previsualización de Factura</h3>
                   <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:#f1f5f9; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">Cerrar</button>
                 </div>
-                ${preview.render(factura)}
-                <div style="padding:20px; text-align:center;">
-                   <button onclick="window.print()" class="btn-primary" style="background:#0f172a; color:white; padding:10px 20px;">Imprimir / Guardar PDF</button>
+                <div id="invoice-preview-container"></div>
+                <div style="padding:24px; text-align:center; display:flex; gap:12px; justify-content:center; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                   <button onclick="window.print()" class="btn-primary" style="flex:1; max-width:200px; background:#0f172a; color:white;">Imprimir / PDF</button>
+                   <button id="send-email-btn" class="btn-primary" style="flex:1; max-width:200px; background:#6366f1; color:white;">Enviar por Email</button>
                 </div>
             `;
             modal.appendChild(content);
             document.body.appendChild(modal);
+
+            // Renderizamos la factura dentro del modal
+            preview.render(factura, 'invoice-preview-container');
+
+            document.getElementById('send-email-btn').onclick = async () => {
+                const email = prompt("Introduce el email del cliente:", "cliente@ejemplo.com");
+                if (email) {
+                    const btn = document.getElementById('send-email-btn');
+                    btn.disabled = true;
+                    btn.innerText = "Enviando...";
+                    try {
+                        await emailService.sendInvoice(factura, email);
+                        alert("✅ Factura enviada correctamente.");
+                    } catch (err) {
+                        alert("❌ Error al enviar el email.");
+                    } finally {
+                        btn.disabled = false;
+                        btn.innerText = "Enviar por Email";
+                    }
+                }
+            };
         };
 
         // Renderizar listado de gastos (IVA soportado/Retenciones)
@@ -307,15 +391,22 @@
         updateInvoicesList();
 
         // Manejar datos del emisor
-        document.getElementById('emi-nombre').value = facturador.emisor.nombre;
-        document.getElementById('emi-nif').value = facturador.emisor.nif;
-        document.getElementById('emi-direccion').value = facturador.emisor.direccion || '';
+        if (facturador.emisor.configurado) {
+            document.getElementById('emisor-base-data').style.display = 'none';
+        } else {
+            document.getElementById('emi-nombre').value = facturador.emisor.nombre;
+            document.getElementById('emi-nif').value = facturador.emisor.nif;
+            document.getElementById('emi-direccion').value = facturador.emisor.direccion || '';
+        }
+
         document.getElementById('save-emisor').onclick = () => {
             const nombre = document.getElementById('emi-nombre').value;
             const nif = document.getElementById('emi-nif').value;
             const direccion = document.getElementById('emi-direccion').value;
+            if (!nombre || !nif) return alert("⚠️ Nombre y NIF son obligatorios.");
             facturador.setEmisor({ nombre, nif, direccion });
-            alert("✅ Datos de emisor actualizados.");
+            alert("✅ Empresa registrada. Se ha bloqueado la licencia para este emisor.");
+            location.reload();
         };
 
         document.getElementById('reset-data').onclick = () => {
@@ -332,13 +423,50 @@
             selector.innerHTML = facturador.emisor.certificados.map(c =>
                 `<option value="${c.id}" ${facturador.emisor.certSeleccionado?.id === c.id ? 'selected' : ''}>${c.nombre} (${c.rol})</option>`
             ).join('') || '<option value="">Ninguno</option>';
+
+            // Sincronizar con el signer
+            signer.setCertificateActive(facturador.emisor.certSeleccionado !== null);
+
+            // Mostrar lista de certificados para poder borrar
+            renderCertList();
+        };
+
+        const renderCertList = () => {
+            const list = facturador.emisor.certificados;
+            const containerId = 'emisor-advanced-data';
+            let listHtml = '<div style="margin-top:10px; font-size:0.65rem;">';
+            list.forEach(c => {
+                listHtml += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:4px; background:rgba(255,255,255,0.02); margin-bottom:2px; border-radius:4px;">
+                        <span>📜 ${c.nombre}</span>
+                        <button onclick="deleteCert(${c.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-weight:bold;">×</button>
+                    </div>
+                `;
+            });
+            listHtml += '</div>';
+
+            // Inyectamos la lista antes del botón reset
+            const existing = document.getElementById('cert-list-container');
+            if (existing) existing.remove();
+            const div = document.createElement('div');
+            div.id = 'cert-list-container';
+            div.innerHTML = listHtml;
+            document.getElementById('emisor-advanced-data').appendChild(div);
+        };
+
+        window.deleteCert = (id) => {
+            if (confirm("¿Eliminar este certificado digital?")) {
+                facturador.removeCertificado(id);
+                updateConfigUI();
+            }
         };
 
         updateConfigUI();
 
         document.getElementById('cert-selector').onchange = (e) => {
             const cert = facturador.emisor.certificados.find(c => c.id == e.target.value);
-            facturador.setEmisor({ certSeleccionado: cert });
+            facturador.setEmisor({ certSeleccionado: cert || null });
+            updateConfigUI();
         };
 
         document.getElementById('save-advanced').onclick = () => {
@@ -465,6 +593,31 @@
                 reader.readAsDataURL(file);
             }
         };
+
+        // Lógica del botón de Sincronización Manual
+        document.getElementById('manual-sync-btn').onclick = async () => {
+            const btn = document.getElementById('manual-sync-btn');
+            btn.style.animation = "spin 1s linear infinite";
+
+            try {
+                await syncWithSever();
+                alert("✅ Estado sincronizado con éxito.");
+            } catch (err) {
+                alert("❌ Error de sincronización: " + err.message);
+            } finally {
+                btn.style.animation = "none";
+            }
+        };
+
+        // Añadir animación de rotación al CSS
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 

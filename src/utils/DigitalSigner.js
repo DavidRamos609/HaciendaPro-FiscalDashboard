@@ -11,9 +11,12 @@ class DigitalSigner {
     uploadCertificate(file) {
         // Simulación de carga y validación de certificado .p12
         console.log("Cargando certificado:", file.name);
-        localStorage.setItem('hpro_cert_active', 'true');
         this.certificateSet = true;
         return { status: "success", info: "Certificado SL activo hasta 2028" };
+    }
+
+    setCertificateActive(isActive) {
+        this.certificateSet = isActive;
     }
 
     async signInvoice(factura) {
