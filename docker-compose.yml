@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  hacienda-pro:
+    image: node:18-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    command: sh -c "npm install && npm start"
+    restart: always

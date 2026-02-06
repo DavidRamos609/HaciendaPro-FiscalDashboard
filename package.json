@@ -4,7 +4,8 @@
   "description": "**Hacienda Pro** is a premium, 100% autonomous fiscal management dashboard designed for the upcoming Spanish **Verifactu 2026** regulations. It empowers professionals and SMEs to manage \"Full Invoices\" (Factura Completa) with total privacy and portability.",
   "main": "service-worker.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "http-server . -p 8080",
+    "dev": "http-server . -p 8080 -c-1"
   },
   "keywords": [],
   "author": "",
