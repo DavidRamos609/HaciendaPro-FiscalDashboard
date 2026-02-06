@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Hacienda Pro
+Comment=Lanzador de Dashboard Fiscal 2026
+Exec=/home/david-ramos/SaaS-Factory/FISCAL\ HACIENDA/hpro-linux.sh
+Icon=utilities-terminal
+Terminal=true
+Type=Application
+Categories=Office;Finance;
+Path=/home/david-ramos/SaaS-Factory/FISCAL HACIENDA/

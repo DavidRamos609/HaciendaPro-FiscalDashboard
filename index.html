@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacienda Pro | Dashboard Fiscal SL 2026</title>
+    <link rel="stylesheet" href="src/index.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="src/assets/icon-192.png">
+</head>
+
+<body>
+    <div id="app">
+        <header style="padding: 40px 24px 20px; max-width: 1400px; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1
+                        style="font-size: 2.5rem; background: linear-gradient(to right, #6366f1, #10b981); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                        Hacienda Pro</h1>
+                    <p style="color: var(--text-muted); margin-top: 8px;">Dashboard de Ingeniería Fiscal 2026 para SL
+                    </p>
+                </div>
+                <div class="glass-card" style="padding: 12px 24px; display: flex; align-items: center; gap: 12px;">
+                    <span class="tax-badge done" id="user-display">Usuario: Invitado</span>
+                    <span class="tax-badge pending" id="sync-status">Sync: Offline</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard-grid" style="max-width: 1400px; margin: 0 auto;">
+            <!-- KPI Cards -->
+            <div class="glass-card animate-fade" style="animation-delay: 0.1s;">
+                <h3 style="color: var(--text-muted); font-size: 0.9rem;">Próximo Vencimiento</h3>
+                <p style="font-size: 1.8rem; margin: 12px 0;">20 de Abril</p>
+                <div style="display: flex; gap: 8px;">
+                    <span class="tax-badge pending">Modelo 303</span>
+                    <span class="tax-badge pending">Modelo 115</span>
+                </div>
+            </div>
+
+            <div class="glass-card animate-fade" style="animation-delay: 0.2s;">
+                <h3 style="color: var(--text-muted); font-size: 0.9rem;">Resultado IVA (Est.)</h3>
+                <p style="font-size: 1.8rem; margin: 12px 0; color: var(--accent);">+ 1.240,50 €</p>
+                <p style="color: var(--text-muted); font-size: 0.8rem;">Basado en 12 facturas cargadas</p>
+            </div>
+
+            <div class="glass-card animate-fade" style="animation-delay: 0.3s;">
+                <h3 style="color: var(--text-muted); font-size: 0.9rem;">Retenciones Sufridas</h3>
+                <p style="font-size: 1.8rem; margin: 12px 0;">380,00 €</p>
+                <p style="color: var(--text-muted); font-size: 0.8rem;">Deducibles en Mod. 200 (IS)</p>
+            </div>
+
+            <!-- Main Actions -->
+            <section class="glass-card animate-fade" style="grid-column: 1 / 2; animation-delay: 0.4s;">
+                <h2>Facturación Verifactu 2026</h2>
+                <div style="margin-top: 20px;">
+                    <div class="glass-card"
+                        style="padding: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.03);">
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">Configuración Emisor (Tus Datos)</p>
+                        <div id="emisor-form"
+                            style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                            <input type="text" id="emi-nombre" placeholder="Nombre SL / Razón Social"
+                                style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
+                            <input type="text" id="emi-nif" placeholder="NIF"
+                                style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
+                            <input type="text" id="emi-direccion" placeholder="Domicilio Fiscal"
+                                style="font-size: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 5px; border-radius: 4px; color: white;">
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <label
+                                    style="font-size: 0.7rem; color: var(--text-muted); flex: 1;">Certificados:</label>
+                                <select id="cert-selector"
+                                    style="font-size: 0.65rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border); color: white; border-radius: 4px; padding: 2px;">
+                                    <option value="">Ninguno</option>
+                                </select>
+                            </div>
+                            <input type="file" id="cert-file" style="display: none;">
+                            <button type="button" onclick="document.getElementById('cert-file').click()"
+                                class="btn-primary"
+                                style="font-size: 0.7rem; padding: 4px; background: rgba(148, 163, 184, 0.1);">Añadir
+                                Certificado</button>
+                            <button type="button" id="save-advanced" class="btn-primary"
+                                style="font-size: 0.7rem; padding: 4px;">Guardar Configuración</button>
+                            <div style="display: flex; gap: 8px;">
+                                <button type="button" id="save-emisor" class="btn-primary"
+                                    style="flex: 2; font-size: 0.7rem; padding: 4px;">Guardar Emisor</button>
+                                <button type="button" id="reset-data" class="btn-primary"
+                                    style="flex: 1; font-size: 0.7rem; padding: 4px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                    <form id="factura-form" style="display: flex; flex-direction: column; gap: 12px;">
+                        <input type="text" id="cli-nombre" placeholder="Cliente / Empresa (Razón Social)"
+                            style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white;">
+                        <input type="text" id="cli-nif" placeholder="NIF Cliente"
+                            style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white;">
+                        <input type="text" id="cli-domicilio" placeholder="Domicilio Fiscal Cliente"
+                            style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white;">
+                        <textarea id="fac-concepto" placeholder="Concepto Detallado (ej: Servicios de consultoría Q1)"
+                            style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white; min-height: 80px; resize: vertical;"></textarea>
+                        <input type="number" id="fac-base" placeholder="Base Imponible (€)"
+                            style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white;">
+
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <select id="tipo-iva"
+                                style="flex: 1; background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 8px; border-radius: 8px; color: white;">
+                                <option value="0.21">IVA 21% (Normal)</option>
+                                <option value="0.10">IVA 10% (Reducido)</option>
+                                <option value="0.04">IVA 4% (Superred.)</option>
+                            </select>
+                            <label style="display: flex; align-items: center; gap: 5px; font-size: 0.8rem;">
+                                <input type="checkbox" id="es-alquiler"> ¿Es Alquiler? (IRPF 19%)
+                            </label>
+                        </div>
+
+                        <button type="button" class="btn-primary">Emitir y Firmar Factura</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="glass-card animate-fade" style="grid-column: 2 / -1; animation-delay: 0.5s;">
+                <h2>Historial y Trazabilidad (Facturas Emitidas)</h2>
+                <div id="history-container" style="margin-top: 20px; max-height: 400px; overflow-y: auto;">
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">No hay registros de facturas enviadas.</p>
+                </div>
+            </section>
+
+            <section class="glass-card animate-fade" style="grid-column: 1 / -1; animation-delay: 0.6s;">
+                <h2>Gastos y Retenciones (Modelos 115/111)</h2>
+                <div id="invoices-list" style="margin-top: 20px;">
+                    <!-- Aquí se renderizará el listado de InvoiceManager -->
+                </div>
+            </section>
+
+            <section class="glass-card animate-fade" style="grid-column: 1 / -1; animation-delay: 0.6s;">
+                <h2>Gestión de Documentos Adicionales</h2>
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 20px;">
+                    <button class="btn-primary"
+                        style="background: rgba(148, 163, 184, 0.1); border: 1px solid var(--border);"
+                        onclick="document.getElementById('camera-input').click()">
+                        📷 Capturar Factura (Cámara)
+                    </button>
+                    <input type="file" id="camera-input" accept="image/*" capture="environment" style="display: none;">
+
+                    <button class="btn-primary"
+                        style="background: rgba(148, 163, 184, 0.1); border: 1px solid var(--border);">Sincronizar
+                        Extracto Bancario</button>
+                    <button class="btn-primary"
+                        style="background: rgba(148, 163, 184, 0.1); border: 1px solid var(--border);">Exportar Modelos
+                        a AEAT (Simulación)</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module">
+        import preview from './src/components/InvoicePreview.js';
+        import invoiceManager from './src/components/InvoiceManager.js';
+        import auth from './src/utils/AuthService.js';
+        import cryptoService from './src/utils/CryptoService.js';
+        import apiService from './src/utils/ApiService.js';
+
+        const appContainer = document.getElementById('app');
+        let currentPassword = ''; // Almacenamos temporalmente para el cifrado Zero-Knowledge
+
+        const showLogin = () => {
+            appContainer.innerHTML = `
+                <div style="height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px;">
+                    <div class="glass-card animate-fade" style="width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--primary);">
+                        <div style="margin-bottom: 30px;">
+                            <h1 style="font-size: 2rem; background: linear-gradient(to right, #6366f1, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                Hacienda Pro</h1>
+                            <p style="color: var(--text-muted); margin-top: 8px;">Identificación de Usuario Fiscal</p>
+                        </div>
+                        <form id="login-form" style="display: flex; flex-direction: column; gap: 16px;">
+                            <input type="text" id="username" placeholder="Usuario / Empresa" required
+                                style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: white; width: 100%;">
+                            <input type="password" id="password" placeholder="Contraseña de Acceso" required
+                                style="background: rgba(0,0,0,0.2); border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: white; width: 100%;">
+                            <button type="submit" class="btn-primary" style="margin-top: 10px;">Acceder al Dashboard</button>
+                        </form>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 20px;">
+                            Acceso seguro y local. Tus datos nunca salen de este dispositivo.
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('login-form').onsubmit = (e) => {
+                e.preventDefault();
+                const user = document.getElementById('username').value;
+                const pass = document.getElementById('password').value;
+                if (auth.login(user, pass)) {
+                    currentPassword = pass;
+                    initDashboard();
+                } else {
+                    alert("⚠️ Error: El usuario o la contraseña no son válidos (mín. 4 caracteres).");
+                }
+            };
+        };
+
+        const syncWithSever = async () => {
+            if (!auth.isAuthenticated()) return;
+            const syncBadge = document.getElementById('sync-status');
+            syncBadge.innerText = "Sync: Cifrando...";
+
+            try {
+                // Capturamos el estado actual (facturas y gastos)
+                const dataToSync = {
+                    facturas: facturador.facturas,
+                    gastos: invoiceManager.invoices
+                };
+
+                // Ciframos con la clave del usuario (Zero-Knowledge)
+                const encrypted = await cryptoService.encrypt(dataToSync, currentPassword);
+
+                // Enviamos a SaaS Factory (valida suscripción interna)
+                await apiService.syncInvoices(encrypted);
+
+                syncBadge.innerText = "Sync: Protegido";
+                syncBadge.className = "tax-badge done";
+            } catch (err) {
+                syncBadge.innerText = "Sync: Requiere Pago";
+                syncBadge.className = "tax-badge pending";
+                console.error(err);
+            }
+        };
+
+        const initDashboard = () => {
+            // Recargamos el contenido original del dashboard (simplificado para esta demo)
+            location.reload();
+        };
+
+        // Verificación inicial de sesión
+        if (!auth.isAuthenticated()) {
+            showLogin();
+        } else {
+            document.querySelector('.tax-badge.done').innerText = `Usuario: ${auth.getUser().name}`;
+        }
+
+        // Actualizar histórico de facturas emitidas (Verifactu)
+        const updateHistory = () => {
+            const history = facturador.getHistory();
+            const container = document.getElementById('history-container');
+            if (history.length > 0) {
+                container.innerHTML = [...history].reverse().map(f => `
+                    <div class="glass-card" style="padding: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border-radius: 12px; border: ${f.rectificativa ? '1px solid #ef4444' : '1px solid var(--border)'};">
+                        <div style="cursor: pointer;" onclick="showInvoiceModal(${f.numero})">
+                            <p style="font-weight: 600;">${f.serie}-${f.numero} ${f.rectificativa ? '<span style="color:#ef4444; font-size:0.6rem;">[RECTIF.]</span>' : ''}</p>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">${f.cliente}</p>
+                            <p style="font-size: 0.65rem; color: var(--text-muted); font-family: monospace;">Hash: ${f.hash.substring(0, 16)}...</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-weight: 700;">${f.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })} €</p>
+                            ${f.anulada ? '<span class="tax-badge" style="background:rgba(239, 68, 68, 0.1); color:#f87171; font-size: 0.6rem;">ANULADA</span>' :
+                        `<button onclick="anularFactura(${f.numero})" style="background:none; border:none; color:#ef4444; font-size:0.6rem; cursor:pointer; text-decoration:underline;">Anular</button>`}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        };
+
+        window.anularFactura = async (id) => {
+            if (confirm(`¿Estás seguro de que deseas anular legalmente la factura ${id}? Se generará una factura rectificativa.`)) {
+                try {
+                    await facturador.anularFactura(id);
+                    updateHistory();
+                    alert("✅ Factura anulada con éxito.");
+                } catch (e) {
+                    alert("❌ Error: " + e.message);
+                }
+            }
+        };
+
+        window.showInvoiceModal = (id) => {
+            const factura = facturador.facturas.find(f => f.numero === id);
+            const modal = document.createElement('div');
+            modal.style = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; display:flex; justify-content:center; align-items:center; backdrop-filter:blur(10px);";
+            modal.onclick = () => document.body.removeChild(modal);
+
+            const content = document.createElement('div');
+            content.style = "background:white; color:black; width:90%; max-width:800px; max-height:90%; overflow-y:auto; border-radius:12px; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);";
+            content.onclick = (e) => e.stopPropagation();
+            content.innerHTML = `
+                <div style="padding:20px; display:flex; justify-content:flex-end;">
+                  <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background:#f1f5f9; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">Cerrar</button>
+                </div>
+                ${preview.render(factura)}
+                <div style="padding:20px; text-align:center;">
+                   <button onclick="window.print()" class="btn-primary" style="background:#0f172a; color:white; padding:10px 20px;">Imprimir / Guardar PDF</button>
+                </div>
+            `;
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+        };
+
+        // Renderizar listado de gastos (IVA soportado/Retenciones)
+        const updateInvoicesList = () => {
+            invoiceManager.renderList('invoices-list');
+        };
+
+        updateHistory();
+        updateInvoicesList();
+
+        // Manejar datos del emisor
+        document.getElementById('emi-nombre').value = facturador.emisor.nombre;
+        document.getElementById('emi-nif').value = facturador.emisor.nif;
+        document.getElementById('emi-direccion').value = facturador.emisor.direccion || '';
+        document.getElementById('save-emisor').onclick = () => {
+            const nombre = document.getElementById('emi-nombre').value;
+            const nif = document.getElementById('emi-nif').value;
+            const direccion = document.getElementById('emi-direccion').value;
+            facturador.setEmisor({ nombre, nif, direccion });
+            alert("✅ Datos de emisor actualizados.");
+        };
+
+        document.getElementById('reset-data').onclick = () => {
+            if (confirm("⚠️ ¿Deseas resetear el dashboard a valores de fábrica? Se borrarán todas las facturas y configuraciones por completo.")) {
+                facturador.resetData();
+                location.reload();
+            }
+        };
+
+        // Manejar datos de configuración avanzada
+        const updateConfigUI = () => {
+            document.getElementById('emi-iban').value = facturador.emisor.iban || '';
+            const selector = document.getElementById('cert-selector');
+            selector.innerHTML = facturador.emisor.certificados.map(c =>
+                `<option value="${c.id}" ${facturador.emisor.certSeleccionado?.id === c.id ? 'selected' : ''}>${c.nombre} (${c.rol})</option>`
+            ).join('') || '<option value="">Ninguno</option>';
+        };
+
+        updateConfigUI();
+
+        document.getElementById('cert-selector').onchange = (e) => {
+            const cert = facturador.emisor.certificados.find(c => c.id == e.target.value);
+            facturador.setEmisor({ certSeleccionado: cert });
+        };
+
+        document.getElementById('save-advanced').onclick = () => {
+            const iban = document.getElementById('emi-iban').value;
+            facturador.setEmisor({ iban });
+            alert("✅ Configuración de cobro guardada.");
+        };
+
+        document.getElementById('cert-file').onchange = (e) => {
+            if (e.target.files.length > 0) {
+                const fileName = e.target.files[0].name;
+                const rol = prompt("Asigna un rol a este certificado (ej: Administrador, Apoderado):", "Administrador");
+                const newCert = { id: Date.now(), nombre: fileName, rol: rol || "Firmante" };
+                facturador.addCertificado(newCert);
+                updateConfigUI();
+                alert(`✅ Certificado "${fileName}" añadido correctamente.`);
+            }
+        };
+
+        // Manejar emisión de nueva factura
+        const form = document.getElementById('factura-form');
+        const btn = form.querySelector('button');
+
+        btn.onclick = async () => {
+            const cliente = document.getElementById('cli-nombre').value;
+            const nifCliente = document.getElementById('cli-nif').value;
+            const domicilioCliente = document.getElementById('cli-domicilio').value;
+            const concepto = document.getElementById('fac-concepto').value;
+            const base = parseFloat(document.getElementById('fac-base').value);
+            const tipoIva = parseFloat(document.getElementById('tipo-iva').value);
+            const esAlquiler = document.getElementById('es-alquiler').checked;
+
+            if (!cliente || !nifCliente || !domicilioCliente || !concepto || isNaN(base)) {
+                alert("⚠️ Por favor, rellena todos los campos fiscales (Cliente, NIF, Domicilio, Concepto e Importe).");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "⏳ Emitiendo...";
+
+            try {
+                // 1. Emitir Verifactu (Factura Completa)
+                let factura = await facturador.emitirFactura({
+                    cliente,
+                    nif: nifCliente,
+                    domicilioCliente,
+                    concepto,
+                    base,
+                    tipoIva,
+                    esAlquiler
+                });
+
+                // 2. Firmar (Demo: Forzamos firma si el simulador lo permite)
+                factura = await signer.signInvoice(factura);
+
+                // 3. Mostrar previsualización
+                preview.render(factura, 'app');
+
+                // 4. Registrar también en InvoiceManager para cálculos de resumen fiscal
+                invoiceManager.addInvoice({
+                    concept: `Venta: ${cliente}${esAlquiler ? ' (Alquiler)' : ''}`,
+                    base: base,
+                    type: 'out',
+                    date: factura.fecha.split('T')[0]
+                });
+
+                // 5. Actualizar UI
+                updateHistory();
+                updateInvoicesList();
+                document.getElementById('cli-nombre').value = '';
+                document.getElementById('cli-nif').value = '';
+                document.getElementById('cli-domicilio').value = '';
+                document.getElementById('fac-concepto').value = '';
+                document.getElementById('fac-base').value = '';
+
+                // 6. Sincronizar automáticamente tras emitir (Cifrado Zero-Knowledge)
+                syncWithSever();
+            } catch (err) {
+                alert("❌ Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Emitir y Firmar Factura";
+            }
+        };
+
+        // Simulación: Añadir un gasto para ver el modelo 115/303
+        window.addMockExpense = () => {
+            invoiceManager.addInvoice({
+                concept: "Alquiler Sede Social",
+                base: 1000,
+                type: 'in',
+                category: 'rent'
+            });
+            updateInvoicesList();
+        };
+
+        // Registro de Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('SW registrado', reg))
+                    .catch(err => console.log('SW error', err));
+            });
+        }
+
+        // Manejo de captura de cámara
+        document.getElementById('camera-input').onchange = (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    // Simular procesamiento OCR de la foto
+                    alert("🔍 Procesando imagen con IA... \n\nSe ha detectado una factura por valor de 45.50€ (IVA inc).");
+                    invoiceManager.addInvoice({
+                        concept: `Gasto Foto: ${file.name}`,
+                        base: 37.60,
+                        type: 'in',
+                        date: new Date().toISOString().split('T')[0]
+                    });
+                    updateInvoicesList();
+                    // Sincronizar tras captura de cámara
+                    syncWithSever();
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+    </script>
+</body>
+
+</html>
