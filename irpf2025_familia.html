@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRPF 2025 · Gestión Familiar · Comunidad de Madrid</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Mulish:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg:#07090f; --bg2:#0c1018; --bg3:#111622; --surface:#161e2e;
+  --surface2:#1c2840; --border:#243352; --border2:#2e4268;
+  --text:#dde6f5; --text2:#8ba3c4; --text3:#4a6080;
+  --cyan:#00c4e8; --cyan2:#009bbf; --gold:#e8b84b; --gold2:#c49530;
+  --green:#1fd98a; --red:#f0566a; --purple:#9b72d4; --orange:#f08030;
+  --navy:#1B3A5C;
+  --r:12px; --shadow:0 12px 40px rgba(0,0,0,0.5);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Mulish',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 15% 0%,rgba(0,196,232,.05) 0%,transparent 55%),radial-gradient(ellipse 50% 70% at 85% 100%,rgba(155,114,212,.04) 0%,transparent 55%);pointer-events:none;z-index:0}
+
+/* ── LAYOUT ── */
+#root{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 24px 80px}
+
+/* ── HEADER ── */
+.site-header{padding:36px 0 28px;border-bottom:1px solid var(--border);margin-bottom:36px;display:flex;align-items:flex-end;justify-content:space-between;animation:fadeD .6s ease both}
+.site-header .brand .eyebrow{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.site-header .brand .eyebrow::before{content:'';display:inline-block;width:18px;height:1px;background:var(--cyan)}
+.site-header h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:400;letter-spacing:-.02em;line-height:1.1}
+.site-header h1 em{font-style:italic;color:var(--gold)}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.04em}
+.badge-madrid{background:rgba(232,184,75,.1);border:1px solid rgba(232,184,75,.25);color:var(--gold)}
+.badge-campana{background:rgba(0,196,232,.08);border:1px solid rgba(0,196,232,.2);color:var(--cyan)}
+.api-wrap label{display:block;text-align:right;font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.1em;margin-bottom:4px}
+.api-wrap input{background:var(--surface);border:1px solid var(--border2);color:var(--text2);padding:7px 12px;border-radius:8px;font-family:'DM Mono',monospace;font-size:11px;width:260px;outline:none;transition:border-color .2s}
+.api-wrap input:focus{border-color:var(--cyan)}
+
+/* ── SCREENS ── */
+.screen{display:none;animation:fadeU .4s ease both}
+.screen.active{display:block}
+
+/* ── FAMILY DASHBOARD ── */
+.dashboard-top{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin-bottom:28px}
+.dashboard-top h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:400}
+.dashboard-top h2 span{color:var(--text3);font-size:16px;font-weight:300;margin-left:8px}
+
+.family-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:32px}
+
+.member-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.member-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--border2);transition:background .25s}
+.member-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--shadow)}
+.member-card:hover::before{background:var(--cyan)}
+.member-card.status-done::before{background:var(--green)}
+.member-card.status-progress::before{background:var(--gold)}
+.member-card.status-error::before{background:var(--red)}
+
+.member-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+.member-card h3{font-size:15px;font-weight:600;margin-bottom:4px}
+.member-card .role-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:12px}
+.member-card .status-line{display:flex;align-items:center;justify-content:space-between}
+.member-card .status-badge{font-size:10px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:100px}
+.status-badge.pending{background:rgba(74,96,128,.2);color:var(--text3);border:1px solid var(--border)}
+.status-badge.progress{background:rgba(232,184,75,.12);color:var(--gold);border:1px solid rgba(232,184,75,.25)}
+.status-badge.done{background:rgba(31,217,138,.1);color:var(--green);border:1px solid rgba(31,217,138,.25)}
+.member-card .result-preview{font-size:13px;font-weight:600}
+.result-preview.devolver{color:var(--green)}
+.result-preview.ingresar{color:var(--red)}
+
+.card-add{background:transparent;border:1px dashed var(--border2);border-radius:var(--r);padding:20px;cursor:pointer;transition:all .25s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:160px;color:var(--text3)}
+.card-add:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,196,232,.03)}
+.card-add .plus{font-size:32px;line-height:1}
+.card-add span{font-size:13px}
+
+/* ── FAMILY SUMMARY ── */
+.family-summary{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:32px}
+.summary-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.sum-stat{text-align:center}
+.sum-stat .label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.sum-stat .value{font-size:22px;font-weight:700;font-family:'DM Mono',monospace}
+.sum-stat .value.pos{color:var(--green)}
+.sum-stat .value.neg{color:var(--red)}
+
+/* ── MODAL ADD MEMBER ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:16px;padding:32px;width:480px;max-width:95vw;animation:fadeU .3s ease both}
+.modal h3{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;font-family:'DM Mono',monospace;letter-spacing:.05em}
+.form-group input,.form-group select{width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:8px;font-family:'Mulish',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--cyan)}
+.form-group select option{background:var(--bg3)}
+.profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:6px}
+.profile-opt{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;font-size:13px}
+.profile-opt:hover,.profile-opt.sel{border-color:var(--cyan);background:rgba(0,196,232,.06);color:var(--cyan)}
+.modal-actions{display:flex;gap:12px;margin-top:24px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 22px;border-radius:9px;font-family:'Mulish',sans-serif;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s;letter-spacing:.02em}
+.btn-primary{background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#000}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,196,232,.3)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-secondary{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-danger{background:rgba(240,86,106,.12);color:var(--red);border:1px solid rgba(240,86,106,.25)}
+.btn-danger:hover{background:rgba(240,86,106,.2)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,184,75,.3)}
+.btn-sm{padding:7px 14px;font-size:12px}
+
+/* ── INTERVIEW SCREEN ── */
+.interview-header{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.back-btn{background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s}
+.back-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.interview-header .member-info{flex:1}
+.interview-header h2{font-family:'Playfair Display',serif;font-size:22px}
+.interview-header .sub{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace}
+.interview-actions{display:flex;gap:8px}
+
+.upload-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.upload-mini{background:var(--bg2);border:1px dashed var(--border2);border-radius:10px;padding:16px 18px;cursor:pointer;transition:all .2s;position:relative;display:flex;align-items:center;gap:12px}
+.upload-mini:hover{border-color:var(--cyan)}
+.upload-mini.has-file{border-style:solid;border-color:var(--green)}
+.upload-mini input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-mini .uicon{font-size:22px;flex-shrink:0}
+.upload-mini .utext h4{font-size:13px;font-weight:600;margin-bottom:2px}
+.upload-mini .utext p{font-size:11px;color:var(--text3)}
+.upload-mini .ustatus{font-size:10px;color:var(--green);font-family:'DM Mono',monospace;margin-top:2px}
+
+.prog-wrap{margin-bottom:20px}
+.prog-bar-bg{background:var(--border);height:3px;border-radius:2px;overflow:hidden;margin-bottom:6px}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:2px;transition:width .5s ease}
+.prog-meta{display:flex;justify-content:space-between;font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)}
+
+/* ── CHAT ── */
+.chat-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);display:flex;flex-direction:column;height:calc(100vh - 380px);min-height:440px}
+#msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+#msgs::-webkit-scrollbar{width:3px}
+#msgs::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.msg{display:flex;gap:10px;align-items:flex-start;animation:msgIn .3s ease both}
+.msg.user{flex-direction:row-reverse}
+.msg-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px}
+.msg.assistant .msg-av{background:linear-gradient(135deg,var(--cyan),var(--purple))}
+.msg.user .msg-av{background:var(--surface2);color:var(--text2)}
+.msg-b{max-width:82%;padding:13px 17px;border-radius:13px;font-size:13.5px;line-height:1.65}
+.msg.assistant .msg-b{background:var(--surface);border:1px solid var(--border);border-top-left-radius:3px;color:var(--text)}
+.msg.user .msg-b{background:linear-gradient(135deg,rgba(0,196,232,.13),rgba(0,196,232,.07));border:1px solid rgba(0,196,232,.22);border-top-right-radius:3px}
+.msg-b strong{color:var(--text);font-weight:600}
+.msg-b .hl-green{background:rgba(31,217,138,.08);border-left:2px solid var(--green);padding:8px 11px;border-radius:0 6px 6px 0;margin:8px 0;font-size:13px}
+.msg-b .hl-red{background:rgba(240,86,106,.08);border-left:2px solid var(--red);padding:8px 11px;border-radius:0 6px 6px 0;margin:8px 0;font-size:13px}
+.msg-b .hl-gold{background:rgba(232,184,75,.08);border-left:2px solid var(--gold);padding:8px 11px;border-radius:0 6px 6px 0;margin:8px 0;font-size:13px}
+.cas{display:inline-flex;align-items:center;background:rgba(232,184,75,.12);border:1px solid rgba(232,184,75,.28);padding:1px 7px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold)}
+.typing-ind{display:flex;gap:4px;padding:13px 17px;background:var(--surface);border:1px solid var(--border);border-radius:13px;border-top-left-radius:3px;width:fit-content}
+.td{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:bounce 1.2s infinite}
+.td:nth-child(2){animation-delay:.2s}
+.td:nth-child(3){animation-delay:.4s}
+
+.qa-row{padding:10px 16px 14px;background:var(--bg3);border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:7px}
+.qa-btn{padding:5px 13px;background:transparent;border:1px solid var(--border2);border-radius:100px;color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s}
+.qa-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+
+.chat-input-row{padding:14px 18px;background:var(--bg3);border-top:1px solid var(--border);display:flex;gap:10px;align-items:flex-end}
+.chat-input-wrap{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:9px;display:flex;align-items:flex-end;transition:border-color .2s}
+.chat-input-wrap:focus-within{border-color:var(--cyan)}
+#chat-in{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'Mulish',sans-serif;font-size:13.5px;padding:11px 15px;resize:none;max-height:110px;line-height:1.5}
+#chat-in::placeholder{color:var(--text3)}
+#send-btn{width:40px;height:40px;background:var(--cyan);border:none;border-radius:7px;color:#000;font-size:15px;cursor:pointer;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center}
+#send-btn:hover{background:var(--cyan2);transform:scale(1.05)}
+#send-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+/* ── MODELO 100 VIEWER ── */
+.modelo-screen{}
+.modelo-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap}
+.modelo-header h2{font-family:'Playfair Display',serif;font-size:22px;flex:1}
+.modelo-tabs{display:flex;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:24px;flex-wrap:wrap;gap:4px}
+.m-tab{padding:8px 16px;background:transparent;border:none;color:var(--text3);font-family:'Mulish',sans-serif;font-size:12px;font-weight:500;cursor:pointer;border-radius:7px;transition:all .2s}
+.m-tab.active{background:var(--surface2);color:var(--text)}
+
+/* ── MODELO 100 LAYOUT ── */
+.m100-page{background:#fff;color:#000;padding:28px 32px;border-radius:8px;margin-bottom:16px;font-family:'Mulish',sans-serif;font-size:11.5px;border:2px solid var(--border);max-width:900px}
+.m100-page .m100-title{background:#003087;color:#fff;padding:8px 14px;margin:-28px -32px 20px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;border-radius:6px 6px 0 0}
+.m100-page .m100-title .aeat-logo{font-size:16px;font-weight:900;letter-spacing:-.02em}
+.m100-section{margin-bottom:20px}
+.m100-section-title{background:#e8f0fe;border-left:4px solid #003087;padding:5px 10px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;color:#003087}
+.m100-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:6px}
+.casilla-box{border:1px solid #ccc;border-radius:3px;overflow:hidden}
+.casilla-box .c-num{background:#f5f5f5;padding:2px 6px;font-size:9px;font-weight:700;color:#666;border-bottom:1px solid #ddd;font-family:'DM Mono',monospace}
+.casilla-box .c-label{padding:3px 6px;font-size:9px;color:#444;border-bottom:1px solid #eee;min-height:24px;line-height:1.3}
+.casilla-box .c-value{padding:4px 8px;font-size:12px;font-weight:700;color:#003087;font-family:'DM Mono',monospace;min-height:26px;background:#fafeff;text-align:right}
+.casilla-box .c-value.empty{color:#bbb;font-weight:400}
+.casilla-box .c-value.resultado-pos{color:#1a7a4a;background:#f0fff8}
+.casilla-box .c-value.resultado-neg{color:#c00;background:#fff5f5}
+.casilla-box.highlight-cas{border-color:#003087;box-shadow:0 0 0 1px #003087}
+
+.m100-nota{font-size:10px;color:#888;font-style:italic;padding:4px 0;border-top:1px dashed #ddd;margin-top:8px}
+.m100-divider{height:1px;background:#e0e0e0;margin:12px 0}
+.m100-total-row{display:flex;align-items:center;justify-content:space-between;background:#003087;color:#fff;padding:8px 14px;border-radius:5px;margin-top:12px}
+.m100-total-row .t-label{font-size:12px;font-weight:600}
+.m100-total-row .t-value{font-size:18px;font-weight:900;font-family:'DM Mono',monospace}
+.t-value.pos{color:#7fffb0}
+.t-value.neg{color:#ffb0b0}
+
+/* ── CONJUNTA COMPARISON ── */
+.conjunta-comp{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:24px}
+.comp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px}
+.comp-col{background:var(--surface);border-radius:10px;padding:16px;text-align:center}
+.comp-col.winner{border:2px solid var(--green);background:rgba(31,217,138,.06)}
+.comp-col h4{font-size:12px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:8px;letter-spacing:.05em}
+.comp-col .big-num{font-size:26px;font-weight:800;font-family:'DM Mono',monospace;margin-bottom:4px}
+.comp-col .win-badge{display:inline-block;background:var(--green);color:#000;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;margin-top:6px}
+
+/* ── PRINT STYLES ── */
+@media print{
+  body{background:#fff!important;color:#000!important}
+  body::before{display:none}
+  .screen:not(.active){display:none!important}
+  .no-print{display:none!important}
+  .m100-page{border:1px solid #ccc;margin-bottom:20px;break-inside:avoid;box-shadow:none}
+  .site-header,.interview-header,.modelo-header,.modelo-tabs,.chat-box,.upload-row,.prog-wrap,.modal-overlay{display:none!important}
+  #root{max-width:100%;padding:0}
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeD{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeU{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+</style>
+</head>
+<body>
+<div id="root">
+
+<!-- ── SITE HEADER ── -->
+<header class="site-header">
+  <div class="brand">
+    <div class="eyebrow">Sistema de Gestión Familiar</div>
+    <h1>IRPF 2025 · <em>Familia</em></h1>
+  </div>
+  <div class="header-right">
+    <div style="display:flex;gap:8px">
+      <span class="badge badge-madrid">🏛 Comunidad de Madrid</span>
+      <span class="badge badge-campana">📅 Campaña 8 abr – 30 jun 2026</span>
+    </div>
+    <div class="api-wrap">
+      <label>SERVIDOR LOCAL</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="api-dot" style="width:8px;height:8px;border-radius:50%;background:var(--border2);display:inline-block;transition:background .3s"></span>
+        <span id="server-status" style="font-family:DM Mono,monospace;font-size:11px;color:var(--text3)">Comprobando...</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SCREEN 1: FAMILY DASHBOARD                 -->
+<!-- ══════════════════════════════════════════ -->
+<div class="screen active" id="screen-dashboard">
+
+  <div class="dashboard-top">
+    <h2>Declarantes <span id="member-count">0 miembros</span></h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <div id="save-indicator" style="font-family:DM Mono,monospace;font-size:10px;color:var(--text3);display:flex;align-items:center;gap:5px">
+        <span id="save-dot" style="width:7px;height:7px;border-radius:50%;background:var(--border2);display:inline-block;transition:background .4s"></span>
+        <span id="save-label">Sin cambios</span>
+      </div>
+      <button class="btn btn-secondary btn-sm no-print" onclick="saveToFile()">💾 Guardar sesión</button>
+      <label class="btn btn-secondary btn-sm no-print" style="cursor:pointer">
+        📂 Cargar sesión
+        <input type="file" accept=".json" id="load-file-input" style="display:none" onchange="loadFromFile(this)">
+      </label>
+      <button class="btn btn-secondary btn-sm no-print" onclick="openDocsModule()">📎 Documentos Fiscales</button>
+      <button class="btn btn-secondary btn-sm no-print" onclick="checkConjunta()">⚖️ Conjunta vs Individual</button>
+      <button class="btn btn-gold btn-sm no-print" onclick="exportAllPDF()">📥 Exportar PDF</button>
+    </div>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="family-summary" id="family-summary" style="display:none">
+    <div class="summary-title">Resumen Familiar · Renta 2025</div>
+    <div class="summary-grid">
+      <div class="sum-stat"><div class="label">Total a Devolver</div><div class="value pos" id="sum-devolver">—</div></div>
+      <div class="sum-stat"><div class="label">Total a Ingresar</div><div class="value neg" id="sum-ingresar">—</div></div>
+      <div class="sum-stat"><div class="label">Resultado Neto</div><div class="value" id="sum-neto">—</div></div>
+      <div class="sum-stat"><div class="label">Declaraciones</div><div class="value" id="sum-count">—</div></div>
+    </div>
+  </div>
+
+  <!-- Conjunta comparison (shown when relevant) -->
+  <div class="conjunta-comp" id="conjunta-section" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:4px">Comparativa Matrimonio</div>
+        <div style="font-size:16px;font-weight:600">Individual vs Declaración Conjunta</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="document.getElementById('conjunta-section').style.display='none'">✕</button>
+    </div>
+    <div class="comp-grid" id="conjunta-comp-grid"></div>
+  </div>
+
+  <!-- Member grid -->
+  <div class="family-grid" id="family-grid">
+    <div class="card-add" onclick="openAddModal()">
+      <div class="plus">＋</div>
+      <span>Añadir declarante</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SCREEN 2: INTERVIEW                        -->
+<!-- ══════════════════════════════════════════ -->
+<div class="screen" id="screen-interview">
+  <div class="interview-header no-print">
+    <button class="back-btn" onclick="goToDashboard()">← Volver</button>
+    <div class="member-info">
+      <h2 id="iw-name">—</h2>
+      <div class="sub" id="iw-sub">IRPF 2025 · Comunidad de Madrid</div>
+    </div>
+    <div class="interview-actions">
+      <button class="btn btn-secondary btn-sm" id="iw-upload-btn" onclick="triggerUpload()">📎 Subir PDF</button>
+      <button class="btn btn-primary btn-sm" id="iw-start-btn" onclick="startCurrentInterview()">▶ Iniciar Entrevista</button>
+      <button class="btn btn-gold btn-sm" id="iw-report-btn" style="display:none" onclick="goToModelo()">📊 Ver Modelo 100 →</button>
+    </div>
+  </div>
+
+  <div class="upload-row no-print">
+    <div class="upload-mini" id="umi-fiscal">
+      <input type="file" accept=".pdf" id="uf-fiscal" onchange="handleUpload('fiscal',this)">
+      <div class="uicon">📄</div>
+      <div class="utext">
+        <h4>Datos Fiscales AEAT 2025</h4>
+        <p>PDF de datos fiscales del ejercicio</p>
+        <div class="ustatus" id="us-fiscal"></div>
+      </div>
+    </div>
+    <div class="upload-mini" id="umi-anterior">
+      <input type="file" accept=".pdf" id="uf-anterior" onchange="handleUpload('anterior',this)">
+      <div class="uicon">📋</div>
+      <div class="utext">
+        <h4>Renta 2024 (anterior)</h4>
+        <p>Declaración del ejercicio pasado</p>
+        <div class="ustatus" id="us-anterior"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prog-wrap no-print">
+    <div class="prog-bar-bg"><div class="prog-bar" id="iw-prog" style="width:3%"></div></div>
+    <div class="prog-meta"><span id="iw-prog-label">Listo para iniciar</span><span id="iw-prog-pct">3%</span></div>
+  </div>
+
+  <div class="chat-box">
+    <div id="msgs"></div>
+    <div class="qa-row" id="qa-row" style="display:none"></div>
+    <div class="chat-input-row">
+      <div class="chat-input-wrap">
+        <textarea id="chat-in" rows="1" placeholder="Responde aquí..." onkeydown="handleKey(event)" oninput="autoH(this)"></textarea>
+      </div>
+      <button id="send-btn" onclick="sendMsg()" disabled>➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SCREEN 3: MODELO 100                       -->
+<!-- ══════════════════════════════════════════ -->
+<div class="screen" id="screen-modelo">
+  <div class="modelo-header no-print">
+    <button class="back-btn" onclick="goToInterview()">← Volver a entrevista</button>
+    <h2 id="m-title">Modelo 100 — —</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm" onclick="goToDashboard()">🏠 Dashboard</button>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Imprimir / PDF</button>
+      <button class="btn btn-gold btn-sm" onclick="downloadHTML()">💾 Descargar HTML</button>
+    </div>
+  </div>
+
+  <div class="modelo-tabs no-print" id="modelo-tabs"></div>
+  <div id="modelo-content"></div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- ADD MEMBER MODAL                           -->
+<!-- ══════════════════════════════════════════ -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h3>Añadir Declarante</h3>
+    <div class="form-group">
+      <label>NOMBRE COMPLETO</label>
+      <input type="text" id="m-name" placeholder="Nombre y apellidos">
+    </div>
+    <div class="form-group">
+      <label>NIF / DNI</label>
+      <input type="text" id="m-nif" placeholder="00000000A">
+    </div>
+    <div class="form-group">
+      <label>AÑO DE NACIMIENTO</label>
+      <input type="number" id="m-year" placeholder="1965" min="1920" max="2007">
+    </div>
+    <div class="form-group">
+      <label>FUENTES DE INGRESOS <span style="color:var(--text3);font-weight:300">(selecciona todas las que apliquen)</span></label>
+      <div class="profile-grid" id="profile-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="profile-opt" data-v="nomina" onclick="toggleProfile(this)">💼 Nómina</div>
+        <div class="profile-opt" data-v="pension" onclick="toggleProfile(this)">🏛 Pensionista</div>
+        <div class="profile-opt" data-v="discapacidad" onclick="toggleProfile(this)">♿ Discapacidad</div>
+        <div class="profile-opt" data-v="autonomo" onclick="toggleProfile(this)">🔧 Autónomo</div>
+        <div class="profile-opt" data-v="estudiante" onclick="toggleProfile(this)">🎓 Estudiante</div>
+        <div class="profile-opt" data-v="sin-ingresos" onclick="toggleProfile(this)">⭕ Sin ingresos</div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px;font-family:'DM Mono',monospace" id="profile-hint">Selecciona uno o varios perfiles</div>
+    </div>
+    <div class="form-group">
+      <label>RELACIÓN FAMILIAR</label>
+      <select id="m-rel">
+        <option value="">— Selecciona —</option>
+        <option value="titular">Titular / Declarante principal</option>
+        <option value="conyuge">Cónyuge</option>
+        <option value="hijo">Hijo/a</option>
+        <option value="padre">Padre/Madre</option>
+        <option value="otro">Otro familiar</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="addMember()">Añadir →</button>
+      <button class="btn btn-secondary" onclick="closeAddModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const S = {
+  apiKey: '',
+  members: [],          // array of member objects
+  currentMemberId: null,
+  loading: false
+};
+
+// Member object shape:
+// { id, name, nif, birthYear, profile, relation, status:'pending'|'progress'|'done',
+//   pdfTexts:{fiscal:'',anterior:''}, messages:[], result:null, casillas:{} }
+
+// ══════════════════════════════════════════════
+// API KEY
+// ══════════════════════════════════════════════
+
+
+// ══════════════════════════════════════════════
+// MEMBER MANAGEMENT
+// ══════════════════════════════════════════════
+let selectedProfiles = []; // array now
+
+function toggleProfile(el){
+  const v = el.dataset.v;
+  if(selectedProfiles.includes(v)){
+    selectedProfiles = selectedProfiles.filter(p=>p!==v);
+    el.classList.remove('sel');
+  } else {
+    selectedProfiles.push(v);
+    el.classList.add('sel');
+  }
+  const hint = document.getElementById('profile-hint');
+  if(hint){
+    if(selectedProfiles.length===0) hint.textContent='Selecciona uno o varios perfiles';
+    else hint.textContent = selectedProfiles.map(p=>PROFILE_LABELS[p]||p).join(' + ');
+  }
+}
+
+// Keep legacy selProfile as alias (no-op, won't be called anymore)
+function selProfile(el){ toggleProfile(el); }
+
+function openAddModal(){ document.getElementById('add-modal').classList.add('open'); }
+function closeAddModal(){
+  document.getElementById('add-modal').classList.remove('open');
+  selectedProfiles=[];
+  document.querySelectorAll('.profile-opt').forEach(e=>e.classList.remove('sel'));
+  const hint=document.getElementById('profile-hint');
+  if(hint) hint.textContent='Selecciona uno o varios perfiles';
+}
+
+function addMember(){
+  const name=document.getElementById('m-name').value.trim();
+  const nif=document.getElementById('m-nif').value.trim();
+  const year=document.getElementById('m-year').value;
+  const rel=document.getElementById('m-rel').value;
+  if(!name){alert('Introduce el nombre del declarante');return;}
+  if(selectedProfiles.length===0){alert('Selecciona al menos una opción de ingresos');return;}
+  // Warn if estudiante/sin-ingresos combined with other income sources
+  const hasNoIncome=selectedProfiles.includes('estudiante')||selectedProfiles.includes('sin-ingresos');
+  const hasIncome=selectedProfiles.some(p=>['nomina','pension','autonomo'].includes(p));
+  if(hasNoIncome && hasIncome){
+    if(!confirm('Has seleccionado "Estudiante" o "Sin ingresos" junto con otras fuentes de ingresos. ¿Confirmas que esta persona tiene ambas situaciones (p.ej. estudiante con algún ingreso ocasional)?')) return;
+  }
+  const m={
+    id:'m_'+Date.now(),
+    name,nif,birthYear:parseInt(year)||1960,
+    profiles: [...selectedProfiles],           // array multi-perfil
+    profile: selectedProfiles[0]||'nomina',    // legacy compat (primer perfil)
+    relation:rel,
+    status:'pending',
+    pdfTexts:{fiscal:'',anterior:''},
+    messages:[],
+    result:null,
+    casillas:{}
+  };
+  S.members.push(m);
+  closeAddModal();
+  ['m-name','m-nif','m-year'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('m-rel').value='';
+  renderDashboard();
+}
+
+function removeMember(id,e){
+  e.stopPropagation();
+  if(!confirm('¿Eliminar este declarante?'))return;
+  S.members=S.members.filter(m=>m.id!==id);
+  renderDashboard();
+}
+
+// ══════════════════════════════════════════════
+// DASHBOARD RENDER
+// ══════════════════════════════════════════════
+const PROFILE_ICONS={'nomina':'💼','pension':'🏛','discapacidad':'♿','autonomo':'🔧','estudiante':'🎓','sin-ingresos':'⭕'};
+const PROFILE_LABELS={'nomina':'Nómina','pension':'Pensionista','discapacidad':'Discapacidad','autonomo':'Autónomo','estudiante':'Estudiante','sin-ingresos':'Sin ingresos'};
+const PROFILE_LABELS_LONG={'nomina':'Trabajador cuenta ajena','pension':'Pensionista / Jubilado','discapacidad':'Discapacidad reconocida','autonomo':'Autónomo','estudiante':'Estudiante / Sin ingresos propios','sin-ingresos':'Sin ingresos (dependiente familiar)'};
+const RELATION_LABELS={'titular':'Titular','conyuge':'Cónyuge','hijo':'Hijo/a','padre':'Padre/Madre','otro':'Familiar'};
+
+function getProfiles(m){ return m.profiles || [m.profile || 'nomina']; }
+function getProfileIcons(m){ return getProfiles(m).map(p=>PROFILE_ICONS[p]||'👤').join(''); }
+function getProfileLabel(m){ return getProfiles(m).map(p=>PROFILE_LABELS[p]||p).join(' + '); }
+function getProfileLabelLong(m){ return getProfiles(m).map(p=>PROFILE_LABELS_LONG[p]||p).join(' · '); }
+
+function renderDashboard(){
+  const grid=document.getElementById('family-grid');
+  const doneMembers=S.members.filter(m=>m.status==='done');
+
+  // Update count
+  document.getElementById('member-count').textContent=S.members.length+' '+(S.members.length===1?'miembro':'miembros');
+
+  // Summary stats
+  if(doneMembers.length>0){
+    document.getElementById('family-summary').style.display='block';
+    let devolver=0,ingresar=0;
+    doneMembers.forEach(m=>{
+      if(m.result&&m.result.valor){
+        if(m.result.tipo==='devolver') devolver+=m.result.valor;
+        else ingresar+=m.result.valor;
+      }
+    });
+    const neto=devolver-ingresar;
+    document.getElementById('sum-devolver').textContent=devolver>0?fmt(devolver)+'€':'—';
+    document.getElementById('sum-ingresar').textContent=ingresar>0?fmt(ingresar)+'€':'—';
+    const netoEl=document.getElementById('sum-neto');
+    netoEl.textContent=(neto>=0?'+':'')+fmt(Math.abs(neto))+'€';
+    netoEl.className='value '+(neto>=0?'pos':'neg');
+    document.getElementById('sum-count').textContent=doneMembers.length+'/'+S.members.length;
+  }
+
+  // Rebuild cards (keep add button last)
+  grid.innerHTML='';
+  S.members.forEach(m=>{
+    const age=2025-m.birthYear;
+    const card=document.createElement('div');
+    card.className='member-card status-'+m.status;
+    card.onclick=()=>openInterview(m.id);
+    card.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="member-avatar" style="background:${avatarBg(getProfiles(m)[0])};font-size:16px;letter-spacing:-2px">${getProfileIcons(m)}</div>
+        <button class="btn btn-danger btn-sm no-print" style="font-size:10px;padding:3px 8px" onclick="removeMember('${m.id}',event)">✕</button>
+      </div>
+      <h3>${m.name}</h3>
+      <div class="role-tag">${getProfileLabel(m)} · ${age}a · ${RELATION_LABELS[m.relation]||m.relation||'—'}</div>
+      <div class="status-line">
+        <span class="status-badge ${m.status}">${statusLabel(m.status)}</span>
+        <span class="result-preview ${m.result?.tipo||''}">${m.result?resultStr(m.result):'—'}</span>
+      </div>
+      ${m.status==='done'?'<div style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openModelo(\''+m.id+'\')" style="width:100%">Ver Modelo 100 →</button></div>':''}
+    `;
+    grid.appendChild(card);
+  });
+
+  const addCard=document.createElement('div');
+  addCard.className='card-add';
+  addCard.onclick=openAddModal;
+  addCard.innerHTML='<div class="plus">＋</div><span>Añadir declarante</span>';
+  grid.appendChild(addCard);
+}
+
+function avatarBg(p){const m={'nomina':'linear-gradient(135deg,#1e3a6e,#2a5298)','pension':'linear-gradient(135deg,#3a2a6e,#5a3a9a)','discapacidad':'linear-gradient(135deg,#1e6e4a,#2a9a6a)','autonomo':'linear-gradient(135deg,#6e3a1e,#9a5a2a)'};return m[p]||'var(--surface2)'}
+function statusLabel(s){return{pending:'Sin iniciar',progress:'En progreso',done:'Completada'}[s]||s}
+function resultStr(r){if(!r||!r.valor)return'—';return(r.tipo==='devolver'?'▲ ':'▼ ')+fmt(r.valor)+'€'}
+function fmt(n){return Number(n).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goToDashboard(){showScreen('screen-dashboard');renderDashboard();}
+function goToInterview(){showScreen('screen-interview');}
+
+function openInterview(id){
+  S.currentMemberId=id;
+  const m=getMember();
+  document.getElementById('iw-name').textContent=m.name;
+  document.getElementById('iw-sub').textContent=`${getProfileLabelLong(m)} · IRPF 2025 · ${2025-m.birthYear} años`;
+  document.getElementById('iw-start-btn').style.display=m.messages.length>0?'none':'inline-flex';
+  document.getElementById('iw-report-btn').style.display=m.status==='done'?'inline-flex':'none';
+  document.getElementById('us-fiscal').textContent=m.pdfTexts.fiscal?'✓ Cargado':'';
+  document.getElementById('us-anterior').textContent=m.pdfTexts.anterior?'✓ Cargado':'';
+  if(m.pdfTexts.fiscal) document.getElementById('umi-fiscal').classList.add('has-file');
+  if(m.pdfTexts.anterior) document.getElementById('umi-anterior').classList.add('has-file');
+
+  // Restore messages
+  const msgsEl=document.getElementById('msgs');
+  msgsEl.innerHTML='';
+  m.messages.forEach(msg=>{
+    if(msg.role==='user') addMsgDOM('user',msg.content);
+    else if(msg.role==='assistant') addMsgDOM('assistant',msg.content);
+  });
+  msgsEl.scrollTop=msgsEl.scrollHeight;
+
+  document.getElementById('send-btn').disabled=m.messages.length===0;
+  showScreen('screen-interview');
+}
+
+function openModelo(id){
+  S.currentMemberId=id;
+  renderModelo();
+  showScreen('screen-modelo');
+}
+
+function goToModelo(){renderModelo();showScreen('screen-modelo');}
+
+function triggerUpload(){document.getElementById('uf-fiscal').click();}
+
+// ══════════════════════════════════════════════
+// PDF UPLOAD
+// ══════════════════════════════════════════════
+async function handleUpload(type,input){
+  const file=input.files[0];
+  if(!file)return;
+  const m=getMember();
+  const statEl=document.getElementById('us-'+type);
+  const cardEl=document.getElementById('umi-'+type);
+  statEl.textContent='⟳ Leyendo...';
+  try{
+    const ab=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+    let txt='';
+    for(let i=1;i<=Math.min(pdf.numPages,35);i++){
+      const pg=await pdf.getPage(i);
+      const ct=await pg.getTextContent();
+      txt+=ct.items.map(x=>x.str).join(' ')+'\n';
+    }
+    m.pdfTexts[type]=txt.substring(0,14000);
+    cardEl.classList.add('has-file');
+    statEl.textContent=`✓ ${file.name} (${pdf.numPages}p)`;
+  }catch(e){
+    m.pdfTexts[type]='[PDF no legible: '+file.name+']';
+    statEl.textContent='⚠ Cargado (parcial)';
+  }
+}
+
+// ══════════════════════════════════════════════
+// SYSTEM PROMPT GENERATOR
+// ══════════════════════════════════════════════
+function buildSystemPrompt(member){
+  const age=2025-member.birthYear;
+  const profiles=getProfiles(member);
+  const profileNote=`Perfiles declarante: ${profiles.map(p=>PROFILE_LABELS_LONG[p]||p).join(' + ')}. Edad: ${age} años (nacido ${member.birthYear}). Relación: ${RELATION_LABELS[member.relation]||member.relation||'—'}.`;
+
+  // Build profile-specific guidance
+  const hasNomina=profiles.includes('nomina');
+  const hasPension=profiles.includes('pension');
+  const hasDiscapacidad=profiles.includes('discapacidad');
+  const hasAutonomo=profiles.includes('autonomo');
+  const hasEstudiante=profiles.includes('estudiante');
+  const hasSinIngresos=profiles.includes('sin-ingresos');
+  const hasNoIncome=hasEstudiante||hasSinIngresos;
+
+  let profileSpecific='';
+  if(hasEstudiante||hasSinIngresos) profileSpecific+=`
+PERFIL ESTUDIANTE / SIN INGRESOS PROPIOS: Este declarante posiblemente NO está obligado a declarar (rentas <1.800€). Sin embargo puede ser RELEVANTE declarar para:
+  1. Que sus PADRES puedan aplicar el mínimo por descendientes (requiere que sus rentas no superen 1.800€ y que no presente declaración propia con resultado positivo).
+  2. Gastos educativos en la declaración de los PADRES (deducción autonómica Madrid: 15% escolaridad, 15% idiomas, 5% vestuario — los padres lo declaran en su propia renta).
+  3. Si el estudiante recibe becas: las becas públicas para estudios reglados están EXENTAS de IRPF. Verificar si es beca pública o privada.
+  4. Si trabaja ocasionalmente (<1.800€): puede no estar obligado pero puede convenir declarar para recuperar retenciones.
+  5. Planes de pensiones a favor del estudiante aportados por padres: posible deducción en renta de los padres.
+  
+PREGUNTAR ESPECÍFICAMENTE:
+  - ¿Tiene el estudiante algún ingreso propio (trabajo parcial, beca remunerada, rendimientos capital)?
+  - ¿Qué tipo de estudios? (universitarios, máster, doctorado, idiomas, FP)
+  - ¿Se pagan intereses de préstamo universitario? → deducción CAM 100% intereses
+  - ¿Los padres pagan los gastos de escolaridad, idiomas o vestuario escolar? → deducción en renta de los padres
+  - ¿Convive con los padres o tiene residencia propia?
+  - ¿Ha recibido becas? → verificar si son exentas
+  - ¿Tiene discapacidad reconocida?`;
+
+  if(hasNomina&&hasPension) profileSpecific+=`
+PERFIL MIXTO NÓMINA + PENSIÓN: Puede haber DOS pagadores (empresa + SS/MUFACE). Verificar si supera límite 15.876€ con 2 pagadores. Preguntar tipo de pensión: jubilación, invalidez, viudedad, orfandad. Incapacidad permanente absoluta → EXENTA.`;
+  if(hasDiscapacidad) profileSpecific+=`
+PERFIL DISCAPACIDAD: Tratar el bloque B como PRIORITARIO. Preguntar: grado certificado (33-64% o ≥65%), si necesita ayuda de 3ª personas o tiene movilidad reducida. Verificar si trabaja actualmente en activo (reduce 3.500€ o 7.750€ sobre rdto trabajo). Preguntar si recibe pensión de incapacidad (¿absoluta? → EXENTA). Verificar si tiene plan de previsión social especial (hasta 24.250€). Verificar si familiares también tienen discapacidad.`;
+  if(hasNomina&&hasDiscapacidad) profileSpecific+=`
+COMBINACIÓN NÓMINA + DISCAPACIDAD: Muy relevante. Aplica reducción adicional rendimientos trabajo en activo (3.500€ si ≥33%, 7.750€ si ≥65% o asistencia), además de la reducción general. Ambas son acumulables.`;
+  if(hasPension&&hasDiscapacidad) profileSpecific+=`
+COMBINACIÓN PENSIÓN + DISCAPACIDAD: Verificar tipo de pensión. Si es incapacidad permanente absoluta → EXENTA (no tributa). Si es pensión de jubilación → tributa como rendimiento trabajo pero aplica mínimo discapacidad. La pensión no contributiva está exenta. MUFACE/Isfas: régimen transitorio.`;
+
+}
+
+// ══════════════════════════════════════════════
+// INTERVIEW LOGIC
+// ══════════════════════════════════════════════
+function getMember(id){return S.members.find(m=>m.id===(id||S.currentMemberId))}
+
+async function startCurrentInterview(){
+  // const apiKey=document.getElementById('api-key').value.trim();
+  // if(!apiKey){alert('Introduce tu API Key de Anthropic');return;}
+  S.apiKey="backend";
+  const m=getMember();
+  m.status='progress';
+  document.getElementById('iw-start-btn').style.display='none';
+  document.getElementById('send-btn').disabled=false;
+
+  let ctx=`Ejercicio: IRPF 2025. Comunidad de Madrid.\nDeclarante: ${m.name} — Perfiles: ${getProfileLabelLong(m)} — ${2025-m.birthYear} años\n\n`;
+  if(m.pdfTexts.fiscal) ctx+=`=== DATOS FISCALES AEAT 2025 ===\n${m.pdfTexts.fiscal}\n\n`;
+  if(m.pdfTexts.anterior) ctx+=`=== RENTA 2024 (ANTERIOR) ===\n${m.pdfTexts.anterior}\n\n`;
+  if(!m.pdfTexts.fiscal&&!m.pdfTexts.anterior) ctx+='Sin documentos aportados. Entrevista completa desde cero.';
+  ctx+='\nInicia la entrevista.';
+
+  m.messages.push({role:'user',content:ctx});
+  await callAPI(m);
+}
+
+async function sendMsg(){
+  const inp=document.getElementById('chat-in');
+  const txt=inp.value.trim();
+  if(!txt||S.loading)return;
+  inp.value=''; inp.style.height='auto';
+  const m=getMember();
+  m.messages.push({role:'user',content:txt});
+  addMsgDOM('user',txt);
+  document.getElementById('qa-row').style.display='none';
+  await callAPI(m);
+}
+
+async function callAPI(m){
+  S.loading=true;
+  document.getElementById('send-btn').disabled=true;
+  showTyping();
+
+  try{
+    const resp=await fetch(window.CLAUDE_ENDPOINT||'http://localhost:3001/api/claude',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'anthropic-version':'2023-06-01',
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:3000,
+        system:buildSystemPrompt(m),
+        messages:m.messages.filter(x=>x.role==='user'||x.role==='assistant')
+      })
+    });
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error.message);
+    const txt=data.content[0].text;
+    m.messages.push({role:'assistant',content:txt});
+    hideTyping();
+    addMsgDOM('assistant',txt);
+    updateProgress(txt);
+    buildQuickAnswers(txt);
+
+    // Check if interview complete
+    if(txt.includes('===INICIO_INFORME===')){
+      parseInforme(txt,m);
+      m.status='done';
+      document.getElementById('iw-report-btn').style.display='inline-flex';
+      renderDashboard();
+    }
+  }catch(err){
+    hideTyping();
+    addMsgDOM('assistant','❌ Error API: '+err.message+'. Verifica tu API Key.');
+  }
+  S.loading=false;
+  document.getElementById('send-btn').disabled=false;
+}
+
+// ══════════════════════════════════════════════
+// PARSE INFORME → CASILLAS
+// ══════════════════════════════════════════════
+function parseInforme(txt,m){
+  try{
+    const block=txt.match(/===INICIO_INFORME===([\s\S]*?)===FIN_INFORME===/);
+    if(!block)return;
+    const content=block[1];
+
+    // Result
+    const resMatch=content.match(/RESULTADO:\s*(DEVOLVER|INGRESAR)\s+([\d.,]+)/i);
+    if(resMatch){
+      m.result={
+        tipo:resMatch[1].toLowerCase(),
+        valor:parseFloat(resMatch[2].replace('.','').replace(',','.'))
+      };
+    }
+
+    // Casillas
+    const casMatch=content.match(/CASILLAS:\n([\s\S]*?)(?=\nRESUMEN:|$)/);
+    if(casMatch){
+      const lines=casMatch[1].trim().split('\n');
+      m.casillas={};
+      lines.forEach(l=>{
+        const parts=l.split('|');
+        if(parts.length>=3){
+          m.casillas[parts[0].trim()]={label:parts[1].trim(),value:parts[2].trim()};
+        }
+      });
+    }
+
+    // Summary
+    const sumMatch=content.match(/RESUMEN:\s*([\s\S]*?)(?=\nJUSTIFICANTES:|$)/);
+    if(sumMatch) m.resumen=sumMatch[1].trim();
+    const justMatch=content.match(/JUSTIFICANTES:\s*([\s\S]*?)(?=\nRECOMENDACIONES:|$)/);
+    if(justMatch) m.justificantes=justMatch[1].trim();
+    const recMatch=content.match(/RECOMENDACIONES:\s*([\s\S]*?)$/);
+    if(recMatch) m.recomendaciones=recMatch[1].trim();
+
+  }catch(e){console.warn('parseInforme error',e)}
+}
+
+// ══════════════════════════════════════════════
+// MODELO 100 RENDERER
+// ══════════════════════════════════════════════
+function renderModelo(){
+  const m=getMember();
+  document.getElementById('m-title').textContent=`Modelo 100 — ${m.name} — IRPF 2025`;
+
+  const tabs=[
+    {id:'pg1',label:'Pág.1 · Datos Personales'},
+    {id:'pg2',label:'Pág.2 · Rendimientos Trabajo'},
+    {id:'pg3',label:'Pág.3 · Otros Ingresos'},
+    {id:'pg4',label:'Pág.4 · Deducciones'},
+    {id:'pg5',label:'Pág.5 · Resultado Final'},
+    {id:'pg6',label:'Justificantes & Notas'}
+  ];
+
+  const tabsEl=document.getElementById('modelo-tabs');
+  tabsEl.innerHTML=tabs.map((t,i)=>`<button class="m-tab ${i===0?'active':''}" onclick="switchTab('${t.id}',this)">${t.label}</button>`).join('');
+
+  const cont=document.getElementById('modelo-content');
+  cont.innerHTML=
+    renderPage1(m)+
+    renderPage2(m)+
+    renderPage3(m)+
+    renderPage4(m)+
+    renderPage5(m)+
+    renderPage6(m);
+
+  // Show only first page
+  cont.querySelectorAll('.m100-page').forEach((p,i)=>{p.style.display=i===0?'block':'none'; p.dataset.tab=tabs[i].id});
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.m-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.m100-page').forEach(p=>{p.style.display=p.dataset.tab===id?'block':'none'});
+}
+
+function cv(m,num){
+  if(m.casillas&&m.casillas[num]) return m.casillas[num].value;
+  return '';
+}
+
+function casBox(m,num,label){
+  const val=cv(m,num);
+  const isEmpty=!val||val==='';
+  const isResult=num==='595'||num==='596'||num==='597';
+  let cls='c-value';
+  if(isEmpty) cls+=' empty';
+  if(isResult&&val){
+    const n=parseFloat(val.replace(/[^0-9.,-]/g,'').replace(',','.'));
+    if(!isNaN(n)) cls+=n>=0?' resultado-pos':' resultado-neg';
+  }
+  return `<div class="casilla-box ${val?'highlight-cas':''}">
+    <div class="c-num">[${num}]</div>
+    <div class="c-label">${label}</div>
+    <div class="${cls}">${val||'—'}</div>
+  </div>`;
+}
+
+function renderPage1(m){
+  const age=2025-m.birthYear;
+  return `<div class="m100-page" data-tab="pg1">
+  <div class="m100-title"><span>MODELO 100 · IRPF 2025 · EJERCICIO 2025</span><span class="aeat-logo">AEAT</span></div>
+  <div class="m100-section">
+    <div class="m100-section-title">Identificación del Declarante</div>
+    <div class="m100-row" style="grid-template-columns:repeat(3,1fr)">
+      ${casBox(m,'001','NIF')}
+      ${casBox(m,'002','Apellidos y Nombre')}
+      ${casBox(m,'003','Fecha de nacimiento')}
+    </div>
+    <div class="m100-row" style="grid-template-columns:1fr 2fr 1fr">
+      ${casBox(m,'004','Código postal')}
+      ${casBox(m,'005','Municipio')}
+      ${casBox(m,'006','Provincia')}
+    </div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Datos del Declarante (Prellenado)</div>
+    <div style="background:#f0f7ff;border:1px solid #c0d8f8;border-radius:4px;padding:10px 14px;font-size:11px;margin-bottom:10px">
+      <strong>Nombre:</strong> ${m.name} &nbsp;|&nbsp; <strong>NIF:</strong> ${m.nif||'—'} &nbsp;|&nbsp; <strong>Edad:</strong> ${age} años &nbsp;|&nbsp; <strong>Perfil:</strong> ${PROFILE_LABELS[m.profile]||m.profile} &nbsp;|&nbsp; <strong>Ejercicio:</strong> 2025
+    </div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Situación Personal y Familiar</div>
+    <div class="m100-row">
+      ${casBox(m,'010','Estado civil')}
+      ${casBox(m,'011','Unidad familiar')}
+      ${casBox(m,'012','NIF cónyuge')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'013','Hijos menores de 25 años')}
+      ${casBox(m,'014','Hijos menores de 3 años')}
+      ${casBox(m,'015','Ascendientes mayores 65 años')}
+    </div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Discapacidad</div>
+    <div class="m100-row">
+      ${casBox(m,'020','Grado discapacidad contribuyente')}
+      ${casBox(m,'021','Asistencia 3ª personas / movilidad')}
+      ${casBox(m,'022','Discapacidad cónyuge (grado)')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'023','Discapacidad descendientes')}
+      ${casBox(m,'024','Discapacidad ascendientes')}
+    </div>
+    <div class="m100-nota">Los grados de discapacidad se acreditan mediante certificado del IMSERSO o resolución judicial. Fecha de referencia: 31/12/2025.</div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Modalidad de Declaración</div>
+    <div class="m100-row">
+      ${casBox(m,'030','Tributación individual/conjunta')}
+      ${casBox(m,'031','Tipo unidad familiar')}
+    </div>
+  </div>
+</div>`;
+}
+
+function renderPage2(m){
+  return `<div class="m100-page" data-tab="pg2" style="display:none">
+  <div class="m100-title"><span>MODELO 100 · IRPF 2025 · RENDIMIENTOS DEL TRABAJO</span><span class="aeat-logo">AEAT</span></div>
+  <div class="m100-section">
+    <div class="m100-section-title">Rendimientos Íntegros del Trabajo</div>
+    <div class="m100-row">
+      ${casBox(m,'003','Rendimientos íntegros (nómina/pensión)')}
+      ${casBox(m,'005','Retribuciones en especie')}
+      ${casBox(m,'007','Total rendimientos íntegros')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'009','Cotizaciones SS y mutualidades')}
+      ${casBox(m,'011','Cuotas sindicales y colegiales')}
+      ${casBox(m,'013','Gastos defensa jurídica')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'014','Otros gastos deducibles (2.000€)')}
+      ${casBox(m,'025','Reducción movilidad geográfica')}
+    </div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Reducción por Rendimientos del Trabajo</div>
+    <div class="m100-row">
+      ${casBox(m,'019','Reducción general rendimientos trabajo')}
+      ${casBox(m,'020','Reducción adicional discapacidad activa')}
+      ${casBox(m,'021','Rendimiento neto reducido del trabajo')}
+    </div>
+    <div class="m100-nota">Novedad 2025: reducción máxima 7.302€ para rentas ≤16.576€ (SMI). La reducción adicional por discapacidad es de 3.500€ (grado ≥33%) o 7.750€ (grado ≥65% o asistencia).</div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Mutualidades (Funcionarios Muface / Isfas / Mugeju)</div>
+    <div class="m100-row">
+      ${casBox(m,'033','Aportaciones mutualidad funcionarios')}
+      ${casBox(m,'034','Régimen transitorio aplicable')}
+    </div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Retenciones e Ingresos a Cuenta</div>
+    <div class="m100-row">
+      ${casBox(m,'596','Retenciones rendimientos trabajo')}
+      ${casBox(m,'035','Nº pagadores distintos')}
+    </div>
+    <div class="m100-nota">Si hay 2 o más pagadores y el 2º supera 1.500€, el límite de obligación de declarar se reduce a 15.876€.</div>
+  </div>
+</div>`;
+}
+
+function renderPage3(m){
+  return `<div class="m100-page" data-tab="pg3" style="display:none">
+  <div class="m100-title"><span>MODELO 100 · IRPF 2025 · OTROS RENDIMIENTOS</span><span class="aeat-logo">AEAT</span></div>
+  <div class="m100-section">
+    <div class="m100-section-title">Rendimientos del Capital Mobiliario (Base Ahorro)</div>
+    <div class="m100-row">
+      ${casBox(m,'029','Dividendos y participaciones beneficios')}
+      ${casBox(m,'030','Intereses cuentas/depósitos')}
+      ${casBox(m,'031','Otros rendimientos capital mobiliario')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'032','Total rendimientos capital mobiliario')}
+      ${casBox(m,'033','Retenciones capital mobiliario')}
+    </div>
+    <div class="m100-nota">Tramos 2025 base ahorro: 19% (≤6k€), 21% (6k-50k€), 23% (50k-200k€), 27% (200k-300k€), 30% (>300k€ — novedad 2025).</div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Rendimientos Capital Inmobiliario (Alquileres propios)</div>
+    <div class="m100-row">
+      ${casBox(m,'060','Ingresos íntegros arrendamientos')}
+      ${casBox(m,'061','Gastos deducibles (amortización, IBI, etc.)')}
+      ${casBox(m,'062','Rendimiento neto capital inmobiliario')}
+    </div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Imputación Rentas Inmobiliarias (2ª vivienda / vacía)</div>
+    <div class="m100-row">
+      ${casBox(m,'080','Valor catastral inmueble(s) imputados')}
+      ${casBox(m,'081','Imputación de renta (1,1% o 2% valor catastral)')}
+    </div>
+    <div class="m100-nota">Se imputa el 1,1% si el valor catastral fue revisado después de 1/1/1994; 2% en el resto de casos.</div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Ganancias y Pérdidas Patrimoniales</div>
+    <div class="m100-row">
+      ${casBox(m,'300','Ganancias patrimoniales (acciones, fondos)')}
+      ${casBox(m,'305','Pérdidas patrimoniales compensables')}
+      ${casBox(m,'306','Variación neta base ahorro')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'310','Criptomonedas — ganancias/pérdidas')}
+      ${casBox(m,'311','Fecha adquisición cripto')}
+    </div>
+  </div>
+</div>`;
+}
+
+function renderPage4(m){
+  return `<div class="m100-page" data-tab="pg4" style="display:none">
+  <div class="m100-title"><span>MODELO 100 · IRPF 2025 · REDUCCIONES Y DEDUCCIONES</span><span class="aeat-logo">AEAT</span></div>
+  <div class="m100-section">
+    <div class="m100-section-title">Mínimo Personal y Familiar</div>
+    <div class="m100-row">
+      ${casBox(m,'505','Mínimo personal')}
+      ${casBox(m,'508','Mínimo por descendientes')}
+      ${casBox(m,'511','Mínimo por ascendientes')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'517','Mínimo por discapacidad (estatal)')}
+      ${casBox(m,'518','Mínimo por discapacidad (autonómico)')}
+      ${casBox(m,'519','Total mínimo personal y familiar')}
+    </div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Reducciones de la Base Imponible</div>
+    <div class="m100-row">
+      ${casBox(m,'430','Aportaciones plan de pensiones')}
+      ${casBox(m,'431','Aport. planes empleo / empresa')}
+      ${casBox(m,'432','Aport. previsión social discapacitados')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'435','Base liquidable general')}
+      ${casBox(m,'460','Base liquidable del ahorro')}
+    </div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Deducciones Estatales</div>
+    <div class="m100-row">
+      ${casBox(m,'547','Inversión vivienda habitual (<2013)')}
+      ${casBox(m,'536','Alquiler vivienda habitual (<2015)')}
+      ${casBox(m,'611','Maternidad (hijos <3 años)')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'623','Familiar discapacidad a cargo (desc.)')}
+      ${casBox(m,'636','Familiar discapacidad a cargo (asc.)')}
+      ${casBox(m,'750','Donativos')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'0414','Deducción rentas bajas (novedad 2025)')}
+      ${casBox(m,'660','Deducción por obras eficiencia energética')}
+      ${casBox(m,'661','Vehículo eléctrico (2025)')}
+    </div>
+  </div>
+  <div class="m100-section">
+    <div class="m100-section-title">Deducciones Autonómicas · Comunidad de Madrid</div>
+    <div class="m100-row">
+      ${casBox(m,'860','Nacimiento / adopción hijo')}
+      ${casBox(m,'870','Arrendamiento vivienda habitual (<40 años)')}
+      ${casBox(m,'880','Gastos educativos')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'890','Familia numerosa CAM')}
+      ${casBox(m,'895','Intereses hipoteca jóvenes (<30)')}
+      ${casBox(m,'896','Subida Euríbor (hipoteca variable)')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'897','Intereses préstamos estudios universitarios')}
+      ${casBox(m,'900','Nuevas empresas SA/SL (40%)')}
+      ${casBox(m,'905','Autoempleo joven (<35 años)')}
+    </div>
+  </div>
+</div>`;
+}
+
+function renderPage5(m){
+  const result=m.result;
+  const resVal=result?result.valor:null;
+  const resTipo=result?result.tipo:'';
+  const resStr=resVal?fmt(resVal)+'€':'—';
+
+  return `<div class="m100-page" data-tab="pg5" style="display:none">
+  <div class="m100-title"><span>MODELO 100 · IRPF 2025 · RESULTADO FINAL</span><span class="aeat-logo">AEAT</span></div>
+  <div class="m100-section">
+    <div class="m100-section-title">Liquidación Final</div>
+    <div class="m100-row">
+      ${casBox(m,'480','Cuota íntegra estatal')}
+      ${casBox(m,'490','Cuota íntegra autonómica')}
+      ${casBox(m,'500','Cuota íntegra total')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'545','Total deducciones cuota estatal')}
+      ${casBox(m,'546','Total deducciones cuota autonómica')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'555','Cuota líquida estatal')}
+      ${casBox(m,'560','Cuota líquida autonómica')}
+      ${casBox(m,'570','Cuota líquida total')}
+    </div>
+    <div class="m100-row">
+      ${casBox(m,'595','Cuota diferencial')}
+      ${casBox(m,'596','Retenciones totales practicadas')}
+    </div>
+  </div>
+  <div class="m100-total-row">
+    <div class="t-label">RESULTADO DE LA DECLARACIÓN</div>
+    <div class="t-value ${resTipo==='devolver'?'pos':'neg'}">
+      ${resTipo==='devolver'?'▲ A DEVOLVER':'▼ A INGRESAR'}: ${resStr}
+    </div>
+  </div>
+  ${result?`
+  <div style="margin-top:14px;background:${resTipo==='devolver'?'#f0fff8':'#fff5f5'};border:1px solid ${resTipo==='devolver'?'#2da86a':'#d04040'};border-radius:6px;padding:12px 16px;font-size:11px;color:${resTipo==='devolver'?'#1a6a40':'#a00'}">
+    <strong>${resTipo==='devolver'?'Hacienda te devuelve':'Debes ingresar en Hacienda'}</strong> ${resStr}<br>
+    Plazo presentación: <strong>8 de abril – 30 de junio de 2026</strong> (domiciliación hasta 25 de junio)<br>
+    Presentación: Renta Web en sede.agenciatributaria.gob.es con certificado digital o Cl@ve
+  </div>
+  `:''}
+  <div class="m100-section" style="margin-top:16px">
+    <div class="m100-section-title">Resumen Ejecutivo</div>
+    <div style="font-size:11px;line-height:1.7;color:#333;white-space:pre-wrap">${(m.resumen||'Completa la entrevista para generar el resumen.').replace(/</g,'&lt;')}</div>
+  </div>
+</div>`;
+}
+
+function renderPage6(m){
+  return `<div class="m100-page" data-tab="pg6" style="display:none">
+  <div class="m100-title"><span>MODELO 100 · IRPF 2025 · JUSTIFICANTES & NOTAS</span><span class="aeat-logo">AEAT</span></div>
+  <div class="m100-section">
+    <div class="m100-section-title">Documentación Justificante Necesaria</div>
+    <div style="font-size:11px;line-height:1.9;color:#333;white-space:pre-wrap">${(m.justificantes||'—').replace(/</g,'&lt;')}</div>
+  </div>
+  <div class="m100-section" style="margin-top:16px">
+    <div class="m100-section-title">Recomendaciones y Alertas</div>
+    <div style="font-size:11px;line-height:1.9;color:#333;white-space:pre-wrap">${(m.recomendaciones||'—').replace(/</g,'&lt;')}</div>
+  </div>
+  <div class="m100-section" style="margin-top:16px">
+    <div class="m100-section-title">Aviso Legal</div>
+    <div style="font-size:10px;color:#888;line-height:1.6">
+      Este documento es un informe de apoyo para uso privado generado mediante IA. No constituye asesoría fiscal oficial ni sustituye la declaración presentada en la sede electrónica de la AEAT.<br>
+      La presentación de la declaración es responsabilidad exclusiva del contribuyente y debe realizarse en Renta Web (sede.agenciatributaria.gob.es) con certificado digital o Cl@ve PIN.<br>
+      Generado: ${new Date().toLocaleDateString('es-ES')} · IRPF 2025 · Comunidad de Madrid
+    </div>
+  </div>
+</div>`;
+}
+
+// ══════════════════════════════════════════════
+// CONJUNTA COMPARISON
+// ══════════════════════════════════════════════
+function checkConjunta(){
+  const spouses=S.members.filter(m=>m.relation==='titular'||m.relation==='conyuge');
+  if(spouses.length<2){alert('Necesitas tener al menos un Titular y un Cónyuge registrados y con declaración completada para simular la comparativa.');return;}
+  const done=spouses.filter(m=>m.status==='done');
+  if(done.length<2){alert('Las declaraciones individuales de ambos cónyuges deben estar completadas para poder comparar con la conjunta.');return;}
+
+  const indA=done[0].result?.valor||0;
+  const indB=done[1].result?.valor||0;
+  const tipoA=done[0].result?.tipo;
+  const tipoB=done[1].result?.tipo;
+
+  const totalInd=(tipoA==='devolver'?-indA:indA)+(tipoB==='devolver'?-indB:indB);
+
+  // Rough estimate: conjunta adds 3.400€ reduction but loses individual thresholds
+  const conjEstimate=totalInd*0.92; // rough 8% benefit heuristic
+
+  const grid=document.getElementById('conjunta-comp-grid');
+  const winInd=totalInd<=conjEstimate;
+
+  grid.innerHTML=`
+    <div class="comp-col ${winInd?'winner':''}">
+      <h4>INDIVIDUAL ${done[0].name}</h4>
+      <div class="big-num ${tipoA==='devolver'?'':''}">
+        ${tipoA==='devolver'?'▲':'▼'} ${fmt(indA)}€
+      </div>
+      <div style="font-size:11px;color:#8ba3c4">${tipoA==='devolver'?'A devolver':'A ingresar'}</div>
+      ${winInd?'<div class="win-badge">✓ Recomendado</div>':''}
+    </div>
+    <div class="comp-col ${winInd?'winner':''}">
+      <h4>INDIVIDUAL ${done[1].name}</h4>
+      <div class="big-num">
+        ${tipoB==='devolver'?'▲':'▼'} ${fmt(indB)}€
+      </div>
+      <div style="font-size:11px;color:#8ba3c4">${tipoB==='devolver'?'A devolver':'A ingresar'}</div>
+    </div>
+    <div class="comp-col ${!winInd?'winner':''}">
+      <h4>CONJUNTA (ESTIMADO)</h4>
+      <div class="big-num ${conjEstimate<=0?'':''}">
+        ${conjEstimate<=0?'▲':'▼'} ${fmt(Math.abs(conjEstimate))}€
+      </div>
+      <div style="font-size:11px;color:#8ba3c4">Estimación IA</div>
+      <div style="font-size:10px;color:#5a7090;margin-top:4px">* Para cálculo exacto, completar entrevista conjunta</div>
+      ${!winInd?'<div class="win-badge">✓ Recomendado</div>':''}
+    </div>
+  `;
+  document.getElementById('conjunta-section').style.display='block';
+  document.getElementById('conjunta-section').scrollIntoView({behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════
+// PROGRESS & QUICK ANSWERS
+// ══════════════════════════════════════════════
+const PROG_BLOCKS=[
+  {re:/estado civil|residencia madrid/i,label:'A · Situación personal',pct:8},
+  {re:/discapacidad|grado.*33|grado.*65|incapacidad permanente/i,label:'B · ♿ Discapacidad',pct:20},
+  {re:/hijo|descendiente|ascendiente/i,label:'C · Situación familiar',pct:30},
+  {re:/pagador|nómina|pensión|rendimiento.*trabajo/i,label:'D · Rendimientos trabajo',pct:42},
+  {re:/mutualidad|muface|isfas/i,label:'E · Mutualidades',pct:50},
+  {re:/capital mobiliario|dividendo|interés bancario|criptomoneda/i,label:'F · Otros ingresos',pct:58},
+  {re:/plan de pensiones|previsión social/i,label:'G · Planes de pensiones',pct:66},
+  {re:/donativo|maternidad|familia numerosa/i,label:'H · Deducciones estatales',pct:74},
+  {re:/deducción.*madrid|gastos educativos|arrendamiento.*vivienda|euríbor/i,label:'I · Deducciones CAM',pct:82},
+  {re:/hipoteca|propietario|alquiler.*vivienda/i,label:'J · Vivienda',pct:88},
+  {re:/individual.*conjunta|conjunta.*individual|modalidad/i,label:'K · Modalidad declaración',pct:95},
+  {re:/===INICIO_INFORME===/,label:'Informe generado ✓',pct:100}
+];
+
+function updateProgress(txt){
+  let best={pct:3,label:'Listo para iniciar'};
+  PROG_BLOCKS.forEach(b=>{if(b.re.test(txt)&&b.pct>best.pct)best=b});
+  document.getElementById('iw-prog').style.width=best.pct+'%';
+  document.getElementById('iw-prog-label').textContent=best.label;
+  document.getElementById('iw-prog-pct').textContent=best.pct+'%';
+}
+
+function buildQuickAnswers(txt){
+  const qa=document.getElementById('qa-row');
+  qa.innerHTML=''; qa.style.display='none';
+  const opts=[];
+  if(/estado civil|casado|soltero/i.test(txt)) opts.push('Casado/a','Soltero/a','Divorciado/a','Viudo/a');
+  else if(/grado.*discapacidad|discapacidad.*reconoc|certificado.*discapacidad/i.test(txt)) opts.push('Sin discapacidad','Grado 33%-64%','Grado ≥65%','Incapacidad perm. absoluta');
+  else if(/ayuda.*tercer|movilidad reducida/i.test(txt)) opts.push('Sí, necesito ayuda 3ª personas','Sí, movilidad reducida','No necesito asistencia');
+  else if(/familiar.*discapacidad|cónyuge.*discapacidad/i.test(txt)) opts.push('Sí, familiar con discapacidad','No');
+  else if(/hijo|descendiente/i.test(txt)) opts.push('Sin hijos','1 hijo','2 hijos','3 o más');
+  else if(/pagador/i.test(txt)) opts.push('1 pagador','2 pagadores','Más de 2');
+  else if(/pensión.*tipo|tipo.*pensión/i.test(txt)) opts.push('Jubilación SS','Clases Pasivas','Incapacidad perm. absoluta','Incapacidad perm. total');
+  else if(/plan de pensiones/i.test(txt)) opts.push('Sí tengo plan','No tengo plan');
+  else if(/alquiler.*vivienda|vivienda.*alquiler|propietario|arrendatario/i.test(txt)) opts.push('Propietario sin hipoteca','Propietario con hipoteca','En alquiler','Familia sin coste');
+  else if(/individual.*conjunta|conjunta.*individual/i.test(txt)) opts.push('Individual','Conjunta');
+  else if(/muface|mutualidad.*funcionario/i.test(txt)) opts.push('Sí, Muface','Sí, Isfas','Sí, Mugeju','No, régimen general SS');
+
+  if(opts.length){
+    qa.style.display='flex';
+    opts.forEach(o=>{
+      const b=document.createElement('button');
+      b.className='qa-btn'; b.textContent=o;
+      b.onclick=()=>{document.getElementById('chat-in').value=o;sendMsg()};
+      qa.appendChild(b);
+    });
+  }
+}
+
+// ══════════════════════════════════════════════
+// CHAT DOM
+// ══════════════════════════════════════════════
+function addMsgDOM(role,content){
+  const c=document.getElementById('msgs');
+  const d=document.createElement('div');
+  d.className='msg '+role;
+  d.innerHTML=`<div class="msg-av">${role==='assistant'?'⚖️':'👤'}</div><div class="msg-b">${fmtMsg(content)}</div>`;
+  c.appendChild(d);
+  c.scrollTop=c.scrollHeight;
+}
+
+function fmtMsg(t){
+  // Hide the raw informe block in chat
+  t=t.replace(/===INICIO_INFORME===[\s\S]*?===FIN_INFORME===/g,'<div class="hl-green">✅ <strong>Informe fiscal generado correctamente.</strong> Pulsa "Ver Modelo 100 →" para ver las casillas rellenas.</div>');
+  return t
+    .replace(/🟢 DEDUCCIÓN DETECTADA[:\s]*(.*)/g,'<div class="hl-green">🟢 <strong>DEDUCCIÓN DETECTADA</strong><br>$1</div>')
+    .replace(/🔴 ATENCIÓN[:\s]*(.*)/g,'<div class="hl-red">🔴 <strong>ATENCIÓN</strong><br>$1</div>')
+    .replace(/ℹ️ NOVEDAD 2025[:\s]*(.*)/g,'<div class="hl-gold">ℹ️ <strong>NOVEDAD 2025</strong><br>$1</div>')
+    .replace(/♿ DISCAPACIDAD[:\s]*(.*)/g,'<div class="hl-green">♿ <strong>DISCAPACIDAD</strong><br>$1</div>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/Casilla\s*(\d+)/gi,'<span class="cas">Cas.$1</span>')
+    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+}
+
+let typEl=null;
+function showTyping(){
+  const c=document.getElementById('msgs');
+  typEl=document.createElement('div');
+  typEl.className='msg assistant';
+  typEl.innerHTML='<div class="msg-av">⚖️</div><div class="typing-ind"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  c.appendChild(typEl);
+  c.scrollTop=c.scrollHeight;
+}
+function hideTyping(){if(typEl){typEl.remove();typEl=null;}}
+
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function autoH(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';}
+
+// ══════════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════════
+function downloadHTML(){
+  const m=getMember();
+  const content=document.getElementById('modelo-content').innerHTML;
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Modelo 100 IRPF 2025 - ${m.name}</title>
+<style>
+body{font-family:sans-serif;background:#fff;padding:20px}
+.m100-page{background:#fff;color:#000;padding:28px 32px;margin-bottom:24px;border:1px solid #ccc;max-width:900px;margin:0 auto 24px}
+.m100-title{background:#003087;color:#fff;padding:8px 14px;margin:-28px -32px 20px;font-size:13px;font-weight:700;display:flex;justify-content:space-between}
+.m100-section{margin-bottom:20px}
+.m100-section-title{background:#e8f0fe;border-left:4px solid #003087;padding:5px 10px;font-weight:700;font-size:11px;text-transform:uppercase;margin-bottom:10px;color:#003087}
+.m100-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:6px}
+.casilla-box{border:1px solid #ccc;border-radius:3px;overflow:hidden}
+.c-num{background:#f5f5f5;padding:2px 6px;font-size:9px;font-weight:700;color:#666;border-bottom:1px solid #ddd;font-family:monospace}
+.c-label{padding:3px 6px;font-size:9px;color:#444;border-bottom:1px solid #eee;min-height:24px}
+.c-value{padding:4px 8px;font-size:12px;font-weight:700;color:#003087;font-family:monospace;text-align:right;min-height:26px}
+.c-value.empty{color:#bbb;font-weight:400}
+.highlight-cas{border-color:#003087}
+.m100-total-row{background:#003087;color:#fff;padding:8px 14px;border-radius:5px;display:flex;justify-content:space-between;align-items:center}
+.m100-nota{font-size:10px;color:#888;font-style:italic;padding:4px 0;border-top:1px dashed #ddd;margin-top:8px}
+.t-value.pos{color:#7fffb0}.t-value.neg{color:#ffb0b0}
+</style></head><body>${content}</body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`Modelo100_IRPF2025_${m.name.replace(/\s+/g,'_')}.html`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportAllPDF(){
+  const done=S.members.filter(m=>m.status==='done');
+  if(done.length===0){alert('Completa al menos una declaración para exportar.');return;}
+  // Build combined print document
+  let html='<html><head><meta charset="UTF-8"><title>IRPF 2025 - Familia</title></head><body style="font-family:sans-serif">';
+  done.forEach(m=>{
+    html+=`<h1 style="margin:20px 0 4px;font-size:16px;color:#003087">Declaración: ${m.name}</h1>`;
+    // We render each member's pages
+    S.currentMemberId=m.id;
+    html+=renderPage1(m)+renderPage2(m)+renderPage3(m)+renderPage4(m)+renderPage5(m)+renderPage6(m);
+    html+='<div style="page-break-after:always"></div>';
+  });
+  html+='</body></html>';
+  const w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(()=>w.print(),600);
+}
+
+// ══════════════════════════════════════════════
+// PERSISTENCE — localStorage + JSON export/import
+// ══════════════════════════════════════════════
+const STORAGE_KEY = 'irpf2025_familia_v1';
+let saveTimer = null;
+let isDirty = false;
+
+// Fields we persist (exclude pdfTexts to keep size manageable — re-upload if needed)
+function getSerializable(member) {
+  return {
+    id: member.id,
+    name: member.name,
+    nif: member.nif,
+    birthYear: member.birthYear,
+    profile: member.profile,
+    relation: member.relation,
+    status: member.status,
+    // Keep messages but strip the initial large PDF context to save space
+    messages: member.messages.map(msg => ({
+      role: msg.role,
+      content: msg.content.length > 8000 ? msg.content.substring(0, 8000) + '\n[...truncado para almacenamiento]' : msg.content
+    })),
+    result: member.result,
+    casillas: member.casillas,
+    resumen: member.resumen,
+    justificantes: member.justificantes,
+    recomendaciones: member.recomendaciones
+    // pdfTexts NOT persisted — files must be re-uploaded
+  };
+}
+
+function getFullState() {
+  return {
+    version: '1.0',
+    savedAt: new Date().toISOString(),
+    ejercicio: 'IRPF 2025',
+    members: S.members.map(getSerializable)
+  };
+}
+
+function restoreState(data) {
+  if (!data || !Array.isArray(data.members)) return false;
+  S.members = data.members.map(m => ({
+    ...m,
+    pdfTexts: { fiscal: '', anterior: '' } // PDFs must be re-uploaded
+  }));
+  return true;
+}
+
+// ── AUTO-SAVE to localStorage ──
+function markDirty() {
+  isDirty = true;
+  setSaveIndicator('pending');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    autoSave();
+  }, 1500); // debounce 1.5s
+}
+
+function autoSave() {
+  try {
+    const data = JSON.stringify(getFullState());
+    localStorage.setItem(STORAGE_KEY, data);
+    const kb = (data.length / 1024).toFixed(1);
+    const now = new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+    setSaveIndicator('saved', `Guardado ${now} (${kb} KB)`);
+    isDirty = false;
+  } catch(e) {
+    setSaveIndicator('error', 'Error al guardar');
+    console.warn('AutoSave error:', e);
+  }
+}
+
+function setSaveIndicator(state, label) {
+  const dot = document.getElementById('save-dot');
+  const lbl = document.getElementById('save-label');
+  if (!dot || !lbl) return;
+  const colors = { pending: '#e8b84b', saved: '#1fd98a', error: '#f0566a', idle: 'var(--border2)' };
+  dot.style.background = colors[state] || colors.idle;
+  lbl.textContent = label || { pending: 'Guardando...', saved: 'Guardado', error: 'Error', idle: 'Sin cambios' }[state];
+}
+
+// ── LOAD from localStorage on startup ──
+function autoLoad() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!restoreState(data)) return false;
+    const saved = new Date(data.savedAt).toLocaleString('es-ES', {
+      day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'
+    });
+    setSaveIndicator('saved', `Sesión: ${saved}`);
+    return true;
+  } catch(e) {
+    console.warn('AutoLoad error:', e);
+    return false;
+  }
+}
+
+// ── EXPORT to JSON file ──
+function saveToFile() {
+  try {
+    const data = getFullState();
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `IRPF2025_Familia_${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setSaveIndicator('saved', `Exportado el ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`);
+    // Also save to localStorage
+    localStorage.setItem(STORAGE_KEY, json);
+  } catch(e) {
+    alert('Error al guardar: ' + e.message);
+  }
+}
+
+// ── IMPORT from JSON file ──
+function loadFromFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.members || !Array.isArray(data.members)) {
+        alert('Archivo no válido. Asegúrate de cargar un archivo guardado por esta aplicación.');
+        return;
+      }
+      const n = data.members.length;
+      const saved = data.savedAt ? new Date(data.savedAt).toLocaleString('es-ES') : 'fecha desconocida';
+      if (!confirm(`¿Cargar sesión con ${n} declarante(s) guardada el ${saved}?\n\nATENCIÓN: Esto reemplazará los datos actuales. Los PDFs deberán subirse de nuevo.`)) return;
+      restoreState(data);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      setSaveIndicator('saved', `Sesión cargada (${n} declarantes)`);
+      renderDashboard();
+      // Reset file input
+      input.value = '';
+    } catch(err) {
+      alert('Error al leer el archivo: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── CLEAR session ──
+function clearSession() {
+  if (!confirm('¿Borrar todos los datos de la sesión actual?\n\nEsta acción no se puede deshacer.')) return;
+  S.members = [];
+  localStorage.removeItem(STORAGE_KEY);
+  setSaveIndicator('idle');
+  renderDashboard();
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+
+// ── SERVER HEALTH CHECK ──
+async function checkServer(){
+  const dot=document.getElementById('api-dot');
+  const lbl=document.getElementById('server-status');
+  if(!dot||!lbl) return;
+  try{
+    const r=await fetch('http://localhost:3001/health',{signal:AbortSignal.timeout(3000)});
+    const d=await r.json();
+    if(d.status==='ok'&&d.key_loaded){
+      dot.style.background='#1fd98a'; lbl.textContent='Conectado ✓'; lbl.style.color='#1fd98a';
+    } else {
+      dot.style.background='#e8b84b'; lbl.textContent='Sin API key en .env'; lbl.style.color='#e8b84b';
+    }
+  }catch(e){
+    dot.style.background='#f0566a'; lbl.textContent='Servidor apagado — ver README'; lbl.style.color='#f0566a';
+  }
+}
+
+function openDocsModule(){
+  window.open('irpf2025_documentos.html','_blank');
+}
+
+renderDashboard();
+checkServer();
+
+if (_sessionLoaded && S.members.length > 0) {
+  setTimeout(() => {
+    const lbl = document.getElementById('save-label');
+    if (lbl) { lbl.style.color = 'var(--green)'; setTimeout(() => { lbl.style.color = ''; }, 3000); }
+  }, 600);
+}
+
+// ── Hook markDirty into addMember / removeMember ──
+const _origAddMember = addMember;
+window.addMember = function() {
+  _origAddMember();
+  markDirty();
+};
+const _origRemoveMember = removeMember;
+window.removeMember = function(id, e) {
+  _origRemoveMember(id, e);
+  markDirty();
+};
+// Hook callAPI to autosave after each IA response
+const _origCallAPI = callAPI;
+window.callAPI = async function(m) {
+  await _origCallAPI(m);
+  markDirty();
+};
+// Save on tab/window close
+window.addEventListener('beforeunload', () => { if (isDirty) autoSave(); });
+</script>
+</body>
+</html>

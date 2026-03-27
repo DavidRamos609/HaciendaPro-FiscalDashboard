@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRPF 2025 · Analizador Documental Fiscal · Madrid</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Mulish:wght@300;400;500;600;700&display=swap');
+:root{
+  --bg:#07090f;--bg2:#0c1018;--bg3:#111622;--surface:#161e2e;--surface2:#1c2840;
+  --border:#243352;--border2:#2e4268;--text:#dde6f5;--text2:#8ba3c4;--text3:#4a6080;
+  --cyan:#00c4e8;--cyan2:#009bbf;--gold:#e8b84b;--gold2:#c49530;
+  --green:#1fd98a;--red:#f0566a;--purple:#9b72d4;--orange:#f08030;
+  --r:12px;--shadow:0 12px 40px rgba(0,0,0,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Mulish',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 10% 0%,rgba(0,196,232,.05) 0%,transparent 55%),radial-gradient(ellipse 50% 60% at 90% 100%,rgba(155,114,212,.04) 0%,transparent 55%);pointer-events:none;z-index:0}
+#root{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 24px 80px}
+
+/* ── HEADER ── */
+.hdr{padding:32px 0 24px;border-bottom:1px solid var(--border);margin-bottom:32px;display:flex;align-items:flex-end;justify-content:space-between}
+.hdr .brand .ey{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.hdr .brand .ey::before{content:'';display:inline-block;width:16px;height:1px;background:var(--cyan)}
+.hdr h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:400;letter-spacing:-.02em}
+.hdr h1 em{font-style:italic;color:var(--gold)}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:100px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.04em}
+.bm{background:rgba(232,184,75,.1);border:1px solid rgba(232,184,75,.25);color:var(--gold)}
+.bc{background:rgba(0,196,232,.08);border:1px solid rgba(0,196,232,.2);color:var(--cyan)}
+.api-wrap label{display:block;text-align:right;font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.1em;margin-bottom:4px}
+.api-wrap input{background:var(--surface);border:1px solid var(--border2);color:var(--text2);padding:6px 11px;border-radius:7px;font-family:'DM Mono',monospace;font-size:11px;width:250px;outline:none;transition:border-color .2s}
+.api-wrap input:focus{border-color:var(--cyan)}
+
+/* ── DECLARANTE SELECTOR ── */
+.decl-bar{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.decl-bar label{font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.decl-bar select{background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:7px 12px;border-radius:8px;font-family:'Mulish',sans-serif;font-size:13px;outline:none;min-width:220px}
+.decl-bar input[type=text]{background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:7px 12px;border-radius:8px;font-family:'Mulish',sans-serif;font-size:13px;outline:none;min-width:200px}
+
+/* ── TABS ── */
+.main-tabs{display:flex;gap:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:5px;margin-bottom:28px}
+.tab{flex:1;padding:10px 8px;background:transparent;border:none;color:var(--text3);font-family:'Mulish',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border-radius:8px;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.tab.active{background:var(--surface2);color:var(--text)}
+.tab .tab-count{background:var(--border2);color:var(--text2);font-size:10px;padding:1px 7px;border-radius:100px;font-family:'DM Mono',monospace}
+.tab.active .tab-count{background:var(--cyan);color:#000}
+
+/* ── PANEL ── */
+.panel{display:none;animation:fadeU .35s ease both}
+.panel.active{display:block}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:all .25s;position:relative;background:var(--bg2);margin-bottom:20px}
+.upload-zone:hover{border-color:var(--cyan);background:rgba(0,196,232,.03)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone .uz-icon{font-size:40px;margin-bottom:12px}
+.upload-zone h3{font-size:15px;font-weight:600;margin-bottom:6px}
+.upload-zone p{font-size:12px;color:var(--text3);line-height:1.6}
+.upload-zone .uz-hint{margin-top:10px;font-size:11px;font-family:'DM Mono',monospace;color:var(--cyan)}
+
+/* ── DOC TYPE SELECTOR ── */
+.doctype-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.doctype-btn{padding:6px 14px;border-radius:100px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px}
+.doctype-btn:hover,.doctype-btn.sel{border-color:var(--cyan);color:var(--cyan);background:rgba(0,196,232,.06)}
+.doctype-btn.sel{font-weight:600}
+
+/* ── INMUEBLE SELECTOR ── */
+.inmueble-row{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.inmueble-row label{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;white-space:nowrap}
+.inmueble-row select,.inmueble-row input{background:var(--bg2);border:1px solid var(--border2);color:var(--text);padding:6px 10px;border-radius:7px;font-size:12px;outline:none}
+.add-inmueble-btn{padding:5px 12px;background:rgba(0,196,232,.1);border:1px solid rgba(0,196,232,.25);color:var(--cyan);border-radius:7px;font-size:12px;cursor:pointer;transition:all .2s}
+.add-inmueble-btn:hover{background:rgba(0,196,232,.2)}
+
+/* ── QUEUE ── */
+.queue{margin-bottom:24px}
+.queue-title{font-size:11px;font-family:'DM Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.queue-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px;display:flex;align-items:center;gap:14px;animation:fadeU .3s ease both;transition:border-color .2s}
+.queue-item.analyzing{border-color:var(--gold)}
+.queue-item.done-ded{border-color:var(--green)}
+.queue-item.done-no{border-color:var(--red)}
+.queue-item.done-par{border-color:var(--orange)}
+.queue-item.done-rev{border-color:var(--purple)}
+.qi-icon{font-size:22px;flex-shrink:0;width:36px;text-align:center}
+.qi-info{flex:1;min-width:0}
+.qi-info h4{font-size:13px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qi-info .qi-meta{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.qi-verdict{flex-shrink:0;text-align:right}
+.verdict-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:.04em;white-space:nowrap}
+.v-ded{background:rgba(31,217,138,.12);border:1px solid rgba(31,217,138,.3);color:var(--green)}
+.v-no{background:rgba(240,86,106,.12);border:1px solid rgba(240,86,106,.3);color:var(--red)}
+.v-par{background:rgba(240,128,48,.12);border:1px solid rgba(240,128,48,.3);color:var(--orange)}
+.v-rev{background:rgba(155,114,212,.12);border:1px solid rgba(155,114,212,.3);color:var(--purple)}
+.v-pend{background:rgba(74,96,128,.12);border:1px solid rgba(74,96,128,.2);color:var(--text3)}
+.v-anal{background:rgba(232,184,75,.1);border:1px solid rgba(232,184,75,.3);color:var(--gold)}
+.qi-amount{font-size:16px;font-weight:700;font-family:'DM Mono',monospace;margin-top:3px}
+.qi-amount.pos{color:var(--green)}
+.qi-amount.neg{color:var(--red)}
+.qi-amount.par{color:var(--orange)}
+.qi-expand{background:transparent;border:1px solid var(--border);color:var(--text3);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;transition:all .2s;flex-shrink:0}
+.qi-expand:hover{border-color:var(--cyan);color:var(--cyan)}
+.qi-detail{margin-top:12px;padding:12px 14px;background:var(--surface);border-radius:8px;font-size:12px;line-height:1.7;color:var(--text2);display:none}
+.qi-detail.open{display:block;animation:fadeU .25s ease both}
+.qi-detail .art{font-family:'DM Mono',monospace;color:var(--cyan);font-size:11px}
+.qi-del{background:transparent;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:2px 6px;transition:color .2s;flex-shrink:0}
+.qi-del:hover{color:var(--red)}
+
+/* ── SUMMARY BOX ── */
+.summary-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;margin-bottom:24px}
+.sb-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.sb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.sb-stat{background:var(--surface);border-radius:10px;padding:14px 16px}
+.sb-stat .sl{font-size:10px;color:var(--text3);margin-bottom:5px;font-family:'DM Mono',monospace;letter-spacing:.05em}
+.sb-stat .sv{font-size:20px;font-weight:700;font-family:'DM Mono',monospace}
+.sv.g{color:var(--green)}.sv.r{color:var(--red)}.sv.o{color:var(--orange)}.sv.c{color:var(--cyan)}
+
+/* ── INMUEBLE CARDS ── */
+.inmuebles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:28px}
+.inmueble-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;transition:all .25s}
+.inmueble-card:hover{border-color:var(--border2)}
+.inmueble-card .ic-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.inmueble-card h3{font-size:14px;font-weight:600}
+.inmueble-card .ic-dir{font-size:11px;color:var(--text3);margin-top:2px}
+.ic-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.ic-stat{background:var(--surface);border-radius:7px;padding:8px 10px}
+.ic-stat .isl{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.05em;margin-bottom:3px}
+.ic-stat .isv{font-size:13px;font-weight:600;font-family:'DM Mono',monospace}
+.ic-stat .isv.pos{color:var(--green)}.ic-stat .isv.neg{color:var(--red)}.ic-stat .isv.neu{color:var(--cyan)}
+.ic-net{background:var(--surface2);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.ic-net .inl{font-size:11px;color:var(--text2)}
+.ic-net .inv{font-size:16px;font-weight:800;font-family:'DM Mono',monospace}
+
+/* ── ANALISIS DETAIL MODAL ── */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-ov.open{display:flex}
+.modal-box{background:var(--bg3);border:1px solid var(--border2);border-radius:16px;padding:28px;max-width:640px;width:95vw;max-height:85vh;overflow-y:auto;animation:fadeU .3s ease both}
+.modal-box::-webkit-scrollbar{width:3px}
+.modal-box::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.modal-box h3{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:18px}
+.dictamen-block{border-radius:10px;padding:14px 18px;margin-bottom:14px;font-size:13px;line-height:1.7}
+.db-ded{background:rgba(31,217,138,.07);border:1px solid rgba(31,217,138,.2)}
+.db-no{background:rgba(240,86,106,.07);border:1px solid rgba(240,86,106,.2)}
+.db-par{background:rgba(240,128,48,.07);border:1px solid rgba(240,128,48,.2)}
+.db-rev{background:rgba(155,114,212,.07);border:1px solid rgba(155,114,212,.2)}
+.dictamen-block h4{font-size:12px;font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.casilla-tag{display:inline-flex;align-items:center;background:rgba(232,184,75,.12);border:1px solid rgba(232,184,75,.28);padding:2px 8px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);margin:2px}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:9px;font-family:'Mulish',sans-serif;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+.btn-p{background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#000}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,196,232,.3)}
+.btn-p:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-s{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-s:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn-g{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000}
+.btn-g:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(232,184,75,.3)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-xs{padding:4px 10px;font-size:11px}
+
+/* ── FAMILIA NUMEROSA ── */
+.fn-card{background:var(--bg2);border:2px solid var(--gold);border-radius:var(--r);padding:22px;margin-bottom:24px}
+.fn-card h3{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.fn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.fn-stat{background:var(--surface);border-radius:8px;padding:12px}
+.fn-stat .fl{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:4px}
+.fn-stat .fv{font-size:15px;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace}
+.fn-upload{border:1px dashed rgba(232,184,75,.4);border-radius:9px;padding:14px;text-align:center;position:relative;cursor:pointer;font-size:12px;color:var(--gold);transition:all .2s}
+.fn-upload:hover{border-color:var(--gold);background:rgba(232,184,75,.05)}
+.fn-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* ── EXPORT ── */
+.export-row{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+
+/* ── LOADING SPINNER ── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(232,184,75,.3);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeU{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── INFO BOX ── */
+.info{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--cyan);border-radius:var(--r);padding:14px 18px;font-size:12.5px;color:var(--text2);line-height:1.65;margin-bottom:20px}
+.info strong{color:var(--text)}
+.warn{border-left-color:var(--gold);color:var(--gold)}
+
+/* PRINT */
+@media print{
+  body{background:#fff!important;color:#000!important}
+  body::before,.hdr,.main-tabs,.decl-bar,.upload-zone,.doctype-row,.inmueble-row,.btn,.export-row,.modal-ov{display:none!important}
+  .panel{display:block!important}
+  #root{max-width:100%;padding:0}
+}
+</style>
+</head>
+<body>
+<div id="root">
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="brand">
+    <div class="ey">Módulo Documental Fiscal · IRPF 2025</div>
+    <h1>Analizador de <em>Ingresos y Gastos</em></h1>
+  </div>
+  <div class="hdr-right">
+    <div style="display:flex;gap:7px">
+      <span class="badge bm">🏛 Madrid</span>
+      <span class="badge bc">📅 Campaña 2026</span>
+    </div>
+    <div class="api-wrap">
+      <label>SERVIDOR LOCAL</label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="api-dot" style="width:8px;height:8px;border-radius:50%;background:var(--border2);display:inline-block;transition:background .3s"></span>
+        <span id="server-status" style="font-family:DM Mono,monospace;font-size:11px;color:var(--text3)">Comprobando...</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- DECLARANTE SELECTOR -->
+<div class="decl-bar">
+  <label>DECLARANTE</label>
+  <input type="text" id="decl-name" placeholder="Nombre del declarante (para el informe)">
+  <label>NIF</label>
+  <input type="text" id="decl-nif" placeholder="00000000A" style="min-width:120px">
+  <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+    <span id="autosave-ind" style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">Sin cambios</span>
+    <button class="btn btn-s btn-sm" onclick="exportSession()">💾 Guardar</button>
+    <label class="btn btn-s btn-sm" style="cursor:pointer">📂 Cargar<input type="file" accept=".json" style="display:none" onchange="importSession(this)"></label>
+    <button class="btn btn-g btn-sm" onclick="exportReport()">📊 Informe PDF</button>
+  </div>
+</div>
+
+<!-- MAIN TABS -->
+<div class="main-tabs">
+  <button class="tab active" onclick="switchTab('gastos',this)">
+    📤 Gastos Deducibles <span class="tab-count" id="tc-gastos">0</span>
+  </button>
+  <button class="tab" onclick="switchTab('ingresos',this)">
+    📥 Ingresos por Alquiler <span class="tab-count" id="tc-ingresos">0</span>
+  </button>
+  <button class="tab" onclick="switchTab('inmuebles',this)">
+    🏠 Inmuebles <span class="tab-count" id="tc-inmuebles">0</span>
+  </button>
+  <button class="tab" onclick="switchTab('fnumerosa',this)">
+    👨‍👩‍👧‍👦 Familia Numerosa
+  </button>
+  <button class="tab" onclick="switchTab('resumen',this)">
+    📋 Resumen Fiscal
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- TAB: GASTOS                         -->
+<!-- ═══════════════════════════════════ -->
+<div class="panel active" id="panel-gastos">
+
+  <div class="info">
+    <strong>Cómo funciona:</strong> Sube las facturas y justificantes. El agente fiscal analiza cada documento contra la legislación IRPF 2025 y emite un dictamen: ✅ Deducible · ⚠️ Parcialmente deducible · ❌ No deducible · 🔍 Requiere verificación. Los gastos deducibles se acumulan automáticamente en el resumen.
+  </div>
+
+  <div style="margin-bottom:14px">
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase">Tipo de gasto</div>
+    <div class="doctype-row" id="gastos-types">
+      <button class="doctype-btn sel" data-v="alquiler-gasto" onclick="selDocType(this,'gastos')">🏠 Gastos inmueble alquiler</button>
+      <button class="doctype-btn" data-v="reforma" onclick="selDocType(this,'gastos')">🔨 Obras / Reformas</button>
+      <button class="doctype-btn" data-v="ibi" onclick="selDocType(this,'gastos')">📑 IBI / Comunidad</button>
+      <button class="doctype-btn" data-v="seguro" onclick="selDocType(this,'gastos')">🛡 Seguros</button>
+      <button class="doctype-btn" data-v="educacion" onclick="selDocType(this,'gastos')">🎓 Gastos educativos</button>
+      <button class="doctype-btn" data-v="donativo" onclick="selDocType(this,'gastos')">❤️ Donativos</button>
+      <button class="doctype-btn" data-v="hipoteca" onclick="selDocType(this,'gastos')">🏦 Hipoteca</button>
+      <button class="doctype-btn" data-v="energia" onclick="selDocType(this,'gastos')">⚡ Eficiencia energética</button>
+      <button class="doctype-btn" data-v="otros-gasto" onclick="selDocType(this,'gastos')">📄 Otros</button>
+    </div>
+  </div>
+
+  <div class="inmueble-row" id="inmueble-select-row" style="display:none">
+    <label>INMUEBLE</label>
+    <select id="gastos-inmueble-sel">
+      <option value="">— Selecciona inmueble —</option>
+    </select>
+    <span style="font-size:11px;color:var(--text3)">Asocia el gasto a un inmueble en alquiler para el cálculo del rendimiento neto</span>
+  </div>
+
+  <div class="upload-zone" id="gastos-drop">
+    <input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="queueFiles('gastos',this.files)">
+    <div class="uz-icon">📄</div>
+    <h3>Arrastra facturas o justificantes</h3>
+    <p>PDF, JPG o PNG · Múltiples archivos a la vez<br>El agente analiza cada documento y determina su deducibilidad</p>
+    <div class="uz-hint">Haz click o arrastra aquí</div>
+  </div>
+
+  <div class="queue" id="gastos-queue">
+    <div class="queue-title">
+      <span>DOCUMENTOS ANALIZADOS</span>
+      <button class="btn btn-s btn-xs" onclick="analyzeAll('gastos')">⚡ Analizar todos pendientes</button>
+    </div>
+    <div id="gastos-list"></div>
+  </div>
+
+  <div class="summary-box">
+    <div class="sb-title">
+      <span>RESUMEN GASTOS DEDUCIBLES</span>
+      <span style="font-size:11px;color:var(--text3)">Acumulado documentos analizados</span>
+    </div>
+    <div class="sb-grid">
+      <div class="sb-stat"><div class="sl">TOTAL DEDUCIBLE</div><div class="sv g" id="sg-total">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">PARCIALMENTE DED.</div><div class="sv o" id="sg-parcial">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">NO DEDUCIBLE</div><div class="sv r" id="sg-no">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">PENDIENTE REVISAR</div><div class="sv" style="color:var(--purple)" id="sg-rev">0</div></div>
+      <div class="sb-stat"><div class="sl">DOCS ANALIZADOS</div><div class="sv c" id="sg-count">0</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- TAB: INGRESOS ALQUILER             -->
+<!-- ═══════════════════════════════════ -->
+<div class="panel" id="panel-ingresos">
+
+  <div class="info">
+    <strong>Ingresos por arrendamiento:</strong> Sube contratos de alquiler, recibos y transferencias. El agente identifica el importe íntegro, verifica si aplica reducción del 50%/60%/90% (alquiler habitual con contrato desde 2024), calcula los gastos deducibles vinculados y obtiene el rendimiento neto del capital inmobiliario (casillas 060-080 del Modelo 100).
+  </div>
+
+  <div style="margin-bottom:14px">
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase">Tipo de documento</div>
+    <div class="doctype-row" id="ingresos-types">
+      <button class="doctype-btn sel" data-v="contrato" onclick="selDocType(this,'ingresos')">📋 Contrato arrendamiento</button>
+      <button class="doctype-btn" data-v="recibo-alquiler" onclick="selDocType(this,'ingresos')">🧾 Recibos / Transferencias</button>
+      <button class="doctype-btn" data-v="deposito-fianza" onclick="selDocType(this,'ingresos')">💰 Depósito fianza</button>
+      <button class="doctype-btn" data-v="interes-banco" onclick="selDocType(this,'ingresos')">🏦 Intereses bancarios</button>
+      <button class="doctype-btn" data-v="dividendo" onclick="selDocType(this,'ingresos')">📈 Dividendos</button>
+      <button class="doctype-btn" data-v="venta-fondos" onclick="selDocType(this,'ingresos')">💹 Venta fondos/acciones</button>
+      <button class="doctype-btn" data-v="otros-ingreso" onclick="selDocType(this,'ingresos')">📄 Otros ingresos</button>
+    </div>
+  </div>
+
+  <div class="inmueble-row">
+    <label>INMUEBLE</label>
+    <select id="ingresos-inmueble-sel">
+      <option value="">— Sin inmueble vinculado —</option>
+    </select>
+    <span style="font-size:11px;color:var(--text3)">Vincula el ingreso a un inmueble para el cálculo del rendimiento neto conjunto</span>
+  </div>
+
+  <div class="upload-zone" id="ingresos-drop">
+    <input type="file" accept=".pdf,.jpg,.jpeg,.png" multiple onchange="queueFiles('ingresos',this.files)">
+    <div class="uz-icon">📥</div>
+    <h3>Arrastra contratos, recibos o certificados</h3>
+    <p>PDF, JPG o PNG · Múltiples archivos<br>El agente identifica ingresos, aplica reducciones y calcula el rendimiento neto</p>
+    <div class="uz-hint">Haz click o arrastra aquí</div>
+  </div>
+
+  <div class="queue" id="ingresos-queue">
+    <div class="queue-title">
+      <span>DOCUMENTOS ANALIZADOS</span>
+      <button class="btn btn-s btn-xs" onclick="analyzeAll('ingresos')">⚡ Analizar todos pendientes</button>
+    </div>
+    <div id="ingresos-list"></div>
+  </div>
+
+  <div class="summary-box">
+    <div class="sb-title"><span>RESUMEN INGRESOS POR ARRENDAMIENTO</span></div>
+    <div class="sb-grid">
+      <div class="sb-stat"><div class="sl">INGRESOS ÍNTEGROS</div><div class="sv c" id="si-bruto">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">GASTOS DEDUCIBLES</div><div class="sv r" id="si-gastos">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">RDTO NETO PREVIO</div><div class="sv" id="si-neto">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">REDUCCIÓN APLICABLE</div><div class="sv g" id="si-reduc">—</div></div>
+      <div class="sb-stat"><div class="sl">RDTO NETO REDUCIDO</div><div class="sv g" id="si-final">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">CASILLAS MODELO 100</div><div class="sv c" style="font-size:12px" id="si-cas">060, 061, 062</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- TAB: INMUEBLES                      -->
+<!-- ═══════════════════════════════════ -->
+<div class="panel" id="panel-inmuebles">
+
+  <div class="info">
+    <strong>Gestión de inmuebles en alquiler:</strong> Registra cada inmueble para llevar el control de ingresos y gastos por separado. El Modelo 100 requiere declarar cada inmueble en arrendamiento de forma individualizada (casillas 059 a 079).
+  </div>
+
+  <div style="margin-bottom:20px;display:flex;gap:10px;align-items:center">
+    <button class="btn btn-p btn-sm" onclick="openAddInmueble()">+ Añadir inmueble</button>
+    <span style="font-size:12px;color:var(--text3)">Hasta 5 inmuebles · Si tienes más contacta con un gestor</span>
+  </div>
+
+  <div class="inmuebles-grid" id="inmuebles-grid">
+    <div style="color:var(--text3);font-size:13px;padding:20px;grid-column:1/-1">No hay inmuebles registrados. Añade uno para empezar.</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- TAB: FAMILIA NUMEROSA              -->
+<!-- ═══════════════════════════════════ -->
+<div class="panel" id="panel-fnumerosa">
+
+  <div class="info warn">
+    <strong>Familia Numerosa:</strong> La deducción NO aparece automáticamente en el borrador de la AEAT. Debes incluirla manualmente. Requiere adjuntar el Título de Familia Numerosa vigente.
+  </div>
+
+  <div class="fn-card">
+    <h3>🏅 Título de Familia Numerosa</h3>
+    <div class="fn-grid">
+      <div class="fn-stat">
+        <div class="fl">CATEGORÍA</div>
+        <div class="fv" id="fn-cat">—</div>
+      </div>
+      <div class="fn-stat">
+        <div class="fl">Nº HIJOS</div>
+        <div class="fv" id="fn-hijos">—</div>
+      </div>
+      <div class="fn-stat">
+        <div class="fl">ESTADO TÍTULO</div>
+        <div class="fv" id="fn-estado" style="font-size:11px">Sin analizar</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div class="fn-upload" id="fn-upload-zone">
+        <input type="file" accept=".pdf,.jpg,.png" onchange="analyzeFN(this)">
+        <div style="font-size:24px;margin-bottom:6px">📄</div>
+        <div style="font-weight:600;margin-bottom:3px">Sube el Título de Familia Numerosa</div>
+        <div style="font-size:11px;opacity:.7">El agente verifica categoría, validez y calcula deducciones</div>
+      </div>
+    </div>
+
+    <div id="fn-result" style="display:none"></div>
+  </div>
+
+  <div class="summary-box" id="fn-summary" style="display:none">
+    <div class="sb-title"><span>DEDUCCIONES FAMILIA NUMEROSA</span></div>
+    <div class="sb-grid">
+      <div class="sb-stat"><div class="sl">DED. ESTATAL</div><div class="sv g" id="fn-ded-estatal">—</div></div>
+      <div class="sb-stat"><div class="sl">DED. AUTONÓMICA CAM</div><div class="sv g" id="fn-ded-cam">—</div></div>
+      <div class="sb-stat"><div class="sl">CASILLA ESTATAL</div><div class="sv c" id="fn-cas-est">—</div></div>
+      <div class="sb-stat"><div class="sl">CASILLA CAM</div><div class="sv c" id="fn-cas-cam">—</div></div>
+      <div class="sb-stat"><div class="sl">TOTAL DEDUCCIÓN</div><div class="sv g" id="fn-total">—</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════ -->
+<!-- TAB: RESUMEN FISCAL                 -->
+<!-- ═══════════════════════════════════ -->
+<div class="panel" id="panel-resumen">
+
+  <div class="summary-box">
+    <div class="sb-title">
+      <span>RESUMEN FISCAL CONSOLIDADO · <span id="rs-nombre">—</span></span>
+      <button class="btn btn-s btn-xs" onclick="recalcResumen()">↻ Recalcular</button>
+    </div>
+    <div class="sb-grid">
+      <div class="sb-stat"><div class="sl">INGRESOS ALQUILER</div><div class="sv c" id="rs-ing">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">GASTOS DEDUCIBLES</div><div class="sv r" id="rs-gas">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">RDTO NETO ALQUILER</div><div class="sv" id="rs-neto">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">FAMILIA NUMEROSA</div><div class="sv g" id="rs-fn">—</div></div>
+      <div class="sb-stat"><div class="sl">GASTOS EDUCATIVOS</div><div class="sv g" id="rs-edu">0,00 €</div></div>
+      <div class="sb-stat"><div class="sl">DONATIVOS</div><div class="sv g" id="rs-don">0,00 €</div></div>
+    </div>
+  </div>
+
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:20px">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:16px">CASILLAS MODELO 100 A RELLENAR</div>
+    <div id="rs-casillas" style="font-size:13px;line-height:2;color:var(--text2)">Completa el análisis de documentos para ver las casillas.</div>
+  </div>
+
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:20px" id="rs-justif-box">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">DOCUMENTACIÓN QUE DEBES CONSERVAR</div>
+    <div id="rs-justif" style="font-size:13px;line-height:1.9;color:var(--text2)">—</div>
+  </div>
+
+  <div class="export-row">
+    <button class="btn btn-p" onclick="exportReport()">📊 Exportar Informe Completo</button>
+    <button class="btn btn-s" onclick="window.print()">🖨️ Imprimir</button>
+    <button class="btn btn-g" onclick="sendToMainApp()">→ Enviar a App Principal</button>
+  </div>
+</div>
+
+<!-- ADD INMUEBLE MODAL -->
+<div class="modal-ov" id="inmueble-modal">
+  <div class="modal-box">
+    <h3>Registrar Inmueble</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <label style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:.06em;display:block;margin-bottom:5px">DIRECCIÓN</label>
+        <input type="text" id="im-dir" placeholder="Calle / Nº / Piso" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:.06em;display:block;margin-bottom:5px">REFERENCIA CATASTRAL</label>
+          <input type="text" id="im-ref" placeholder="Opcional" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:.06em;display:block;margin-bottom:5px">VALOR CATASTRAL (€)</label>
+          <input type="number" id="im-val" placeholder="150000" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:.06em;display:block;margin-bottom:5px">USO</label>
+          <select id="im-uso" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none">
+            <option value="habitual">Alquiler vivienda habitual inquilino</option>
+            <option value="temporal">Alquiler temporal / turístico</option>
+            <option value="vacio">Vacío / 2ª residencia</option>
+            <option value="propio">Uso propio (vivienda habitual)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:.06em;display:block;margin-bottom:5px">% PROPIEDAD</label>
+          <input type="number" id="im-pct" placeholder="100" min="1" max="100" value="100" style="width:100%;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none">
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-p" onclick="addInmueble()">Añadir →</button>
+      <button class="btn btn-s" onclick="document.getElementById('inmueble-modal').classList.remove('open')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const DS = {
+  docs: { gastos:[], ingresos:[] },
+  inmuebles: [],
+  fn: null,
+  selectedDocType: { gastos:'alquiler-gasto', ingresos:'contrato' }
+};
+let saveT=null;
+
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+function switchTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='resumen') recalcResumen();
+  if(id==='inmuebles') renderInmuebles();
+}
+
+// ═══════════════════════════════════════
+// DOC TYPE
+// ═══════════════════════════════════════
+const GASTO_INMUEBLE_TYPES=['alquiler-gasto','reforma','ibi','seguro'];
+function selDocType(el,tab){
+  document.querySelectorAll(`#${tab}-types .doctype-btn`).forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  DS.selectedDocType[tab]=el.dataset.v;
+  // Show/hide inmueble selector for gastos
+  if(tab==='gastos'){
+    const show=GASTO_INMUEBLE_TYPES.includes(el.dataset.v);
+    document.getElementById('inmueble-select-row').style.display=show?'flex':'none';
+  }
+}
+
+// ═══════════════════════════════════════
+// FILE QUEUE
+// ═══════════════════════════════════════
+async function queueFiles(tab,files){
+  for(const file of files){
+    const id='doc_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    const doc={
+      id,tab,
+      name:file.name,
+      type:DS.selectedDocType[tab],
+      inmueble: tab==='gastos'
+        ? document.getElementById('gastos-inmueble-sel').value
+        : document.getElementById('ingresos-inmueble-sel').value,
+      status:'pending',
+      text:'',
+      verdict:null,
+      amount:null,
+      amountParcial:null,
+      detail:'',
+      casillas:[],
+      fundamento:''
+    };
+    // Extract text
+    try{
+      if(file.type==='application/pdf'){
+        const ab=await file.arrayBuffer();
+        const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+        let t='';
+        for(let i=1;i<=Math.min(pdf.numPages,20);i++){
+          const pg=await pdf.getPage(i);
+          const ct=await pg.getTextContent();
+          t+=ct.items.map(x=>x.str).join(' ')+'\n';
+        }
+        doc.text=t.substring(0,10000);
+      } else {
+        // image — convert to base64 for API
+        doc.text='[Imagen: '+file.name+']';
+        doc.imageFile=file;
+      }
+    }catch(e){doc.text='[Error leyendo: '+file.name+']'}
+
+    DS.docs[tab].push(doc);
+    renderDocList(tab);
+    // Auto-analyze
+    await analyzeDoc(doc,tab);
+  }
+  markDirty();
+}
+
+function renderDocList(tab){
+  const list=document.getElementById(tab+'-list');
+  const docs=DS.docs[tab];
+  document.getElementById('tc-'+tab).textContent=docs.length;
+  if(docs.length===0){list.innerHTML='<div style="color:var(--text3);font-size:13px;padding:16px 0">Sin documentos todavía</div>';return;}
+
+  list.innerHTML=docs.map(d=>`
+    <div class="queue-item ${d.status==='analyzing'?'analyzing':d.verdict?'done-'+d.verdict:''}" id="qi-${d.id}">
+      <div class="qi-icon">${docIcon(d.type)}</div>
+      <div class="qi-info">
+        <h4>${d.name}</h4>
+        <div class="qi-meta">${docTypeLabel(d.type)}${d.inmueble?' · '+getInmuebleLabel(d.inmueble):''}</div>
+      </div>
+      <div class="qi-verdict">
+        <div>${verdictBadge(d)}</div>
+        <div class="qi-amount ${d.verdict==='ded'?'pos':d.verdict==='no'?'neg':'par'}">${d.amount!=null?fmt(d.amount)+'€':''}</div>
+      </div>
+      ${d.verdict?`<button class="qi-expand" onclick="toggleDetail('${d.id}')">Ver análisis</button>`:''}
+      <button class="qi-del" onclick="removeDoc('${d.id}','${tab}')" title="Eliminar">✕</button>
+    </div>
+    <div class="qi-detail" id="qd-${d.id}">
+      ${d.detail?formatDetail(d.detail):''}
+    </div>
+  `).join('');
+  updateSummary(tab);
+}
+
+function docIcon(type){
+  const m={
+    'alquiler-gasto':'🏠','reforma':'🔨','ibi':'📑','seguro':'🛡','educacion':'🎓',
+    'donativo':'❤️','hipoteca':'🏦','energia':'⚡','otros-gasto':'📄',
+    'contrato':'📋','recibo-alquiler':'🧾','deposito-fianza':'💰',
+    'interes-banco':'🏦','dividendo':'📈','venta-fondos':'💹','otros-ingreso':'📄'
+  };
+  return m[type]||'📄';
+}
+
+function docTypeLabel(type){
+  const m={
+    'alquiler-gasto':'Gastos inmueble alquiler','reforma':'Obras/Reformas','ibi':'IBI/Comunidad',
+    'seguro':'Seguros','educacion':'Gastos educativos','donativo':'Donativo',
+    'hipoteca':'Hipoteca','energia':'Eficiencia energética','otros-gasto':'Otros gastos',
+    'contrato':'Contrato arrendamiento','recibo-alquiler':'Recibos alquiler',
+    'deposito-fianza':'Depósito fianza','interes-banco':'Intereses bancarios',
+    'dividendo':'Dividendos','venta-fondos':'Venta fondos/acciones','otros-ingreso':'Otros ingresos'
+  };
+  return m[type]||type;
+}
+
+function verdictBadge(d){
+  if(d.status==='analyzing') return '<span class="verdict-badge v-anal"><span class="spin"></span> Analizando</span>';
+  if(d.status==='pending') return '<span class="verdict-badge v-pend">Pendiente</span>';
+  const m={
+    'ded':'<span class="verdict-badge v-ded">✅ Deducible</span>',
+    'no':'<span class="verdict-badge v-no">❌ No deducible</span>',
+    'par':'<span class="verdict-badge v-par">⚠️ Parcial</span>',
+    'rev':'<span class="verdict-badge v-rev">🔍 Revisar</span>'
+  };
+  return m[d.verdict]||'<span class="verdict-badge v-pend">—</span>';
+}
+
+function toggleDetail(id){
+  const el=document.getElementById('qd-'+id);
+  el.classList.toggle('open');
+  const btn=document.querySelector(`#qi-${id} .qi-expand`);
+  if(btn) btn.textContent=el.classList.contains('open')?'Ocultar':'Ver análisis';
+}
+
+function removeDoc(id,tab){
+  DS.docs[tab]=DS.docs[tab].filter(d=>d.id!==id);
+  renderDocList(tab);
+  markDirty();
+}
+
+function formatDetail(txt){
+  return txt
+    .replace(/DEDUCIBLE/g,'<strong style="color:var(--green)">DEDUCIBLE</strong>')
+    .replace(/NO DEDUCIBLE/g,'<strong style="color:var(--red)">NO DEDUCIBLE</strong>')
+    .replace(/PARCIALMENTE/g,'<strong style="color:var(--orange)">PARCIALMENTE</strong>')
+    .replace(/REQUIERE VERIFICACIÓN/g,'<strong style="color:var(--purple)">REQUIERE VERIFICACIÓN</strong>')
+    .replace(/Art\.\s*(\d+)/g,'<span class="art">Art.$1 LIRPF</span>')
+    .replace(/casilla\s*(\d+)/gi,'<span class="casilla-tag">Cas.$1</span>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\n/g,'<br>');
+}
+
+// ═══════════════════════════════════════
+// ANALYZE DOCUMENT
+// ═══════════════════════════════════════
+function buildAnalysisPrompt(doc){
+  const tab=doc.tab;
+  const isGasto=tab==='gastos';
+  const isIngreso=tab==='ingresos';
+
+  const LEGISLACION=`
+NORMATIVA IRPF 2025 — GASTOS DEDUCIBLES CAPITAL INMOBILIARIO (Art. 23 LIRPF):
+Son deducibles los gastos NECESARIOS para la obtención de los rendimientos:
+1. Intereses préstamos para adquisición o mejora del inmueble (límite: rendimientos íntegros)
+2. Gastos de reparación y conservación (pintura, fontanería, electricidad, tejado — NO mejoras estructurales)
+3. Tributos y recargos no estatales: IBI, tasa basuras (NO multas ni sanciones)
+4. Saldos de dudoso cobro (impagos del arrendatario, con requisitos de tiempo)
+5. Primas de seguros (incendio, responsabilidad civil, robo, continente y contenido)
+6. Servicios y suministros: comunidad de propietarios, portería, administración
+7. Gastos formales de gestión: honorarios abogado/procurador por reclamación, gestoría
+8. Amortización: 3% sobre el mayor de: coste adquisición o valor catastral (excluido suelo, aprox 20-30% del valor catastral)
+
+NO DEDUCIBLES: mejoras estructurales, ampliaciones, valor del suelo, gastos personales, IVA no deducible, IRPF del propietario
+
+GASTOS EDUCATIVOS (Deducción Autonómica CAM — Art. 4 DL 1/2010 CAM):
+- DEDUCIBLE 15%: gastos escolaridad (matrícula, mensualidad de colegio/universidad)
+- DEDUCIBLE 15%: enseñanza de idiomas (EOI, academias de idiomas extraescolares)  
+- DEDUCIBLE 5%: vestuario escolar exigido por el centro
+- NO DEDUCIBLE: material escolar, libros de texto, comedor, transporte, actividades extraescolares no regladas
+- Límite BI conjunta familiar ≤ 30.930€
+- Casillas: gastos escolaridad → casilla 880 CAM; idiomas → incluido en 880
+
+DONATIVOS (Art. 68.3 LIRPF + Ley 49/2002):
+- DEDUCIBLE 80%: primeros 150€ a entidades acogidas Ley 49/2002 (ONGs, fundaciones, iglesias, partidos)
+- DEDUCIBLE 35%: resto de donativo (40% si se dona 3 años consecutivos misma entidad importes ≥ anteriores)
+- NO DEDUCIBLE: donaciones a particulares, entidades no acogidas Ley 49/2002, cuotas asociaciones
+- Límite: 10% base liquidable. Casilla 750
+
+HIPOTECA (solo régimen transitorio — Art. DT 18 LIRPF):
+- Solo viviendas compradas ANTES del 1/1/2013
+- Deducible 15% sobre cantidades pagadas (capital + intereses), base máxima 9.040€/año → max 1.356€
+- Si comprada DESPUÉS de 2012: NO hay deducción estatal (solo posible CAM en casos específicos)
+- Subida Euríbor (CAM, hipotecas variables, vivienda ≤390.000€): 25% exceso intereses sobre Euríbor dic-2022, máx 154,65€. Casilla 896
+
+EFICIENCIA ENERGÉTICA (Disposición Adicional 50ª y 58ª LIRPF — prorrogadas 2025):
+- 20%: reducción consumo calefacción/refrigeración ≥7% (máx base 5.000€, obras 2021-2025)
+- 40%: reducción consumo calefacción/refrigeración ≥30% (máx base 7.500€)
+- 60%: edificio de uso residencial (máx base 5.000€/año, hasta 15.000€ acumulado)
+- Vehículo eléctrico enchufable comprado en 2025 (RD-ley 3/2025): deducción en vigor
+
+REDUCCIÓN ALQUILER (Art. 23.2 LIRPF — importante para 2025):
+- 50%: alquiler vivienda habitual del inquilino (contratos generales)
+- 60%: zonas de mercado tensionado (Madrid capital y varios municipios desde 2024)
+- 90%: nuevos contratos en zonas tensionadas con reducción ≥5% respecto anterior contrato
+- 30%: alquileres con arrendatario joven (18-35 años)
+- 0%: alquiler temporal, turístico, sin declarar en plazo (ATENCIÓN: pérdida reducción)
+
+INGRESOS CAPITAL MOBILIARIO (Art. 25 LIRPF — base del ahorro):
+- Intereses bancarios: base ahorro 19-30%. Casilla 029-030
+- Dividendos: base ahorro. Primeros 1.500€ EXENTOS (si contrato laboral con empresa). Casilla 029
+- Venta fondos/acciones: ganancia/pérdida patrimonial. Casilla 300
+`;
+
+  return `Eres un inspector fiscal experto en IRPF 2025, especializado en Comunidad de Madrid. Tu tarea es analizar el documento adjunto y emitir un DICTAMEN FISCAL preciso.
+
+${LEGISLACION}
+
+DOCUMENTO A ANALIZAR:
+- Tipo declarado: ${docTypeLabel(doc.type)}
+- Categoría: ${isGasto?'GASTO':'INGRESO'}
+- Nombre archivo: ${doc.name}
+- Inmueble vinculado: ${doc.inmueble?getInmuebleLabel(doc.inmueble):'No vinculado'}
+- Contenido extraído del documento:
+---
+${doc.text||'[Documento sin texto extraíble — analiza por tipo y nombre de archivo]'}
+---
+
+INSTRUCCIONES DE RESPUESTA (JSON estricto):
+Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin markdown, sin explicaciones fuera del JSON:
+
+{
+  "verdict": "ded|no|par|rev",
+  "amount": 1234.56,
+  "amountParcial": 500.00,
+  "porcentaje": 100,
+  "casillas": ["060","061"],
+  "fundamento": "Art. 23.1.a LIRPF",
+  "tipo_rendimiento": "capital_inmobiliario|capital_mobiliario|trabajo|ganancia_patrimonial|no_sujeto",
+  "reduccion_aplicable": "50%|60%|90%|30%|ninguna",
+  "detail": "Análisis detallado en texto libre (3-6 párrafos). Incluir: qué es el documento, fundamento legal exacto, qué es deducible y qué no, importe deducible, casilla Modelo 100, advertencias y condiciones. Si es parcialmente deducible explicar qué parte sí y cuál no."
+}
+
+Valores de verdict:
+- "ded": totalmente deducible o computable como ingreso
+- "no": no deducible / no computable / exento
+- "par": parcialmente deducible (indicar porcentaje y amountParcial)
+- "rev": requiere documentación adicional o interpretación dudosa
+
+Si el documento no tiene suficiente texto para determinar el importe exacto, estima basándote en el tipo y lo que puedas inferir, o pon null en amount.`;
+}
+
+async function analyzeDoc(doc, tab){
+  // const apiKey=document.getElementById('api-key').value.trim();
+  // if(!apiKey) return;
+
+  doc.status='analyzing';
+  renderDocList(tab);
+
+  try{
+    const resp=await fetch(window.CLAUDE_ENDPOINT||'http://localhost:3001/api/claude',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'anthropic-version':'2023-06-01',
+      },
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1500,
+        messages:[{role:'user',content:buildAnalysisPrompt(doc)}]
+      })
+    });
+    const data=await resp.json();
+    if(data.error) throw new Error(data.error.message);
+
+    const raw=data.content[0].text.trim();
+    // Strip markdown fences if present
+    const clean=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    const result=JSON.parse(clean);
+
+    doc.verdict=result.verdict||'rev';
+    doc.amount=result.amount;
+    doc.amountParcial=result.amountParcial;
+    doc.porcentaje=result.porcentaje;
+    doc.casillas=result.casillas||[];
+    doc.fundamento=result.fundamento||'';
+    doc.tipoRendimiento=result.tipo_rendimiento||'';
+    doc.reduccion=result.reduccion_aplicable||'';
+    doc.detail=result.detail||'Sin análisis disponible.';
+    doc.status='done';
+
+  }catch(e){
+    doc.verdict='rev';
+    doc.detail='Error en el análisis: '+e.message+'. Revisa manualmente este documento.';
+    doc.status='done';
+  }
+
+  renderDocList(tab);
+  updateSummary(tab);
+  markDirty();
+}
+
+async function analyzeAll(tab){
+  const pending=DS.docs[tab].filter(d=>d.status==='pending');
+  for(const doc of pending) await analyzeDoc(doc,tab);
+}
+
+// ═══════════════════════════════════════
+// SUMMARY
+// ═══════════════════════════════════════
+function updateSummary(tab){
+  const docs=DS.docs[tab].filter(d=>d.status==='done');
+  if(tab==='gastos'){
+    const total=docs.filter(d=>d.verdict==='ded').reduce((s,d)=>s+(d.amount||0),0);
+    const parcial=docs.filter(d=>d.verdict==='par').reduce((s,d)=>s+(d.amountParcial||d.amount||0),0);
+    const no=docs.filter(d=>d.verdict==='no').reduce((s,d)=>s+(d.amount||0),0);
+    const rev=docs.filter(d=>d.verdict==='rev').length;
+    document.getElementById('sg-total').textContent=fmt(total)+'€';
+    document.getElementById('sg-parcial').textContent=fmt(parcial)+'€';
+    document.getElementById('sg-no').textContent=fmt(no)+'€';
+    document.getElementById('sg-rev').textContent=rev;
+    document.getElementById('sg-count').textContent=docs.length;
+  } else {
+    const bruto=docs.filter(d=>d.verdict==='ded'||d.verdict==='par').reduce((s,d)=>s+(d.amount||0),0);
+    const gastosDed=DS.docs['gastos'].filter(d=>d.inmueble&&(d.verdict==='ded'||d.verdict==='par')).reduce((s,d)=>s+(d.verdict==='par'?d.amountParcial||0:d.amount||0),0);
+    const neto=bruto-gastosDed;
+    const reduc=docs.find(d=>d.reduccion&&d.reduccion!=='ninguna');
+    document.getElementById('si-bruto').textContent=fmt(bruto)+'€';
+    document.getElementById('si-gastos').textContent=fmt(gastosDed)+'€';
+    document.getElementById('si-neto').textContent=fmt(neto)+'€';
+    document.getElementById('si-reduc').textContent=reduc?reduc.reduccion:'Sin reducción detectada';
+    const pctR=reduc?parseFloat(reduc.reduccion)||50:50;
+    document.getElementById('si-final').textContent=fmt(neto*(1-pctR/100))+'€';
+  }
+}
+
+// ═══════════════════════════════════════
+// INMUEBLES
+// ═══════════════════════════════════════
+function openAddInmueble(){document.getElementById('inmueble-modal').classList.add('open');}
+
+function addInmueble(){
+  const dir=document.getElementById('im-dir').value.trim();
+  if(!dir){alert('Introduce la dirección');return;}
+  const im={
+    id:'im_'+Date.now(),
+    dir,
+    ref:document.getElementById('im-ref').value,
+    valorCatastral:parseFloat(document.getElementById('im-val').value)||0,
+    uso:document.getElementById('im-uso').value,
+    pct:parseFloat(document.getElementById('im-pct').value)||100
+  };
+  DS.inmuebles.push(im);
+  document.getElementById('inmueble-modal').classList.remove('open');
+  ['im-dir','im-ref','im-val'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('im-pct').value=100;
+  updateInmuebleSelects();
+  renderInmuebles();
+  document.getElementById('tc-inmuebles').textContent=DS.inmuebles.length;
+  markDirty();
+}
+
+function updateInmuebleSelects(){
+  const opts='<option value="">— Sin inmueble —</option>'+
+    DS.inmuebles.map(im=>`<option value="${im.id}">${im.dir.substring(0,35)}</option>`).join('');
+  document.getElementById('gastos-inmueble-sel').innerHTML=opts;
+  document.getElementById('ingresos-inmueble-sel').innerHTML=opts;
+}
+
+function getInmuebleLabel(id){
+  const im=DS.inmuebles.find(i=>i.id===id);
+  return im?im.dir.substring(0,30):'—';
+}
+
+function renderInmuebles(){
+  const grid=document.getElementById('inmuebles-grid');
+  if(DS.inmuebles.length===0){
+    grid.innerHTML='<div style="color:var(--text3);font-size:13px;padding:20px;grid-column:1/-1">No hay inmuebles registrados. Añade uno para empezar.</div>';
+    return;
+  }
+  grid.innerHTML=DS.inmuebles.map(im=>{
+    const ingresos=DS.docs.ingresos.filter(d=>d.inmueble===im.id&&(d.verdict==='ded'||d.verdict==='par')).reduce((s,d)=>s+(d.amount||0),0);
+    const gastos=DS.docs.gastos.filter(d=>d.inmueble===im.id&&(d.verdict==='ded'||d.verdict==='par')).reduce((s,d)=>s+(d.verdict==='par'?d.amountParcial||0:d.amount||0),0);
+    const neto=ingresos-gastos;
+    const usoLabel={'habitual':'Vivienda habitual inquilino','temporal':'Temporal/Turístico','vacio':'Vacío/2ª residencia','propio':'Uso propio'}[im.uso]||im.uso;
+    const amort=im.valorCatastral>0?Math.round(im.valorCatastral*0.03*(im.pct/100)):null;
+    return `<div class="inmueble-card">
+      <div class="ic-header">
+        <div>
+          <h3>🏠 ${im.dir.substring(0,28)}</h3>
+          <div class="ic-dir">${usoLabel} · ${im.pct}% propiedad${im.ref?' · Ref: '+im.ref:''}</div>
+        </div>
+        <button class="btn btn-s btn-xs" onclick="removeInmueble('${im.id}')">✕</button>
+      </div>
+      <div class="ic-stats">
+        <div class="ic-stat"><div class="isl">INGRESOS</div><div class="isv neu">${fmt(ingresos)}€</div></div>
+        <div class="ic-stat"><div class="isl">GASTOS DED.</div><div class="isv neg">-${fmt(gastos)}€</div></div>
+        ${amort?`<div class="ic-stat"><div class="isl">AMORT. EST. (3%)</div><div class="isv neg">-${fmt(amort)}€/año</div></div>`:''}
+        <div class="ic-stat"><div class="isl">DOCS GASTOS</div><div class="isv">${DS.docs.gastos.filter(d=>d.inmueble===im.id).length}</div></div>
+      </div>
+      <div class="ic-net">
+        <div class="inl">Rendimiento neto estimado</div>
+        <div class="inv" style="color:${neto>=0?'var(--cyan)':'var(--green)'}">${fmt(neto)}€</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeInmueble(id){
+  if(!confirm('¿Eliminar este inmueble? Se desvinculará de los documentos asociados.'))return;
+  DS.inmuebles=DS.inmuebles.filter(i=>i.id!==id);
+  DS.docs.gastos.forEach(d=>{if(d.inmueble===id)d.inmueble='';});
+  DS.docs.ingresos.forEach(d=>{if(d.inmueble===id)d.inmueble='';});
+  updateInmuebleSelects();
+  renderInmuebles();
+  document.getElementById('tc-inmuebles').textContent=DS.inmuebles.length;
+  markDirty();
+}
+
+// ═══════════════════════════════════════
+// FAMILIA NUMEROSA
+// ═══════════════════════════════════════
+async function analyzeFN(input){
+  const file=input.files[0];
+  if(!file) return;
+  // const apiKey=document.getElementById('api-key').value.trim();
+  // if(!apiKey){alert('Introduce tu API Key');return;}
+
+  document.getElementById('fn-estado').textContent='⟳ Analizando título...';
+  document.getElementById('fn-result').style.display='none';
+
+  let text='';
+  try{
+    if(file.type==='application/pdf'){
+      const ab=await file.arrayBuffer();
+      const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+      for(let i=1;i<=Math.min(pdf.numPages,10);i++){
+        const pg=await pdf.getPage(i);
+        const ct=await pg.getTextContent();
+        text+=ct.items.map(x=>x.str).join(' ')+'\n';
+      }
+    }
+  }catch(e){text='[Error leyendo PDF]';}
+
+  const prompt=`Eres un experto fiscal IRPF 2025 España. Analiza este título de familia numerosa y calcula las deducciones aplicables.
+
+LEGISLACIÓN:
+- Deducción estatal (Art. 67 bis LIRPF): 1.200€/año categoría general, 2.400€/año categoría especial. Casilla 623.
+- Deducción autonómica Madrid (Art. 4.Cuatro DL 1/2010 CAM): 50% de la cuota íntegra autonómica. Límite: 6.186€ individual, 12.372€ conjunta. Si algún miembro tiene discapacidad ≥65%, dobla los importes. Casilla 890 CAM.
+- Categoría GENERAL: 3 hijos o más, o 2 hijos si uno tiene discapacidad ≥33%, o familia monoparental con 2 hijos.
+- Categoría ESPECIAL: 5 hijos o más, o 4 hijos si al menos 3 son por parto múltiple, o ingresos anuales no superan determinado umbral.
+- Vigencia del título: verificar que no haya caducado (fecha expedición + renovación). Si caduca se pierde la deducción.
+
+DOCUMENTO:
+${text.substring(0,6000)||'[Sin texto extraíble — analiza por contexto]'}
+
+Responde en JSON estricto:
+{
+  "categoria": "GENERAL|ESPECIAL|NO_DETERMINADO",
+  "numHijos": 3,
+  "vigente": true,
+  "fechaCaducidad": "2026-12-31",
+  "discapacidadMiembro": false,
+  "dedEstatal": 1200,
+  "casEstatal": "623",
+  "dedCAM": "50% cuota íntegra autonómica (máx 6.186€)",
+  "casCAM": "890",
+  "totalEstimado": "Entre 1.200€ y 7.386€ según cuota autonómica",
+  "alertas": ["Si hay miembro con discapacidad ≥65%, la deducción CAM se dobla"],
+  "analisis": "Texto libre con análisis completo, condiciones y recomendaciones"
+}`;
+
+  try{
+    const resp=await fetch(window.CLAUDE_ENDPOINT||'http://localhost:3001/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await resp.json();
+    if(data.error) throw new Error(data.error.message);
+    const raw=data.content[0].text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    const r=JSON.parse(raw);
+    DS.fn=r;
+
+    document.getElementById('fn-cat').textContent=r.categoria||'—';
+    document.getElementById('fn-hijos').textContent=r.numHijos||'—';
+    document.getElementById('fn-estado').textContent=r.vigente?'✅ Vigente'+(r.fechaCaducidad?' hasta '+r.fechaCaducidad:''):'⚠️ Verificar vigencia';
+
+    document.getElementById('fn-ded-estatal').textContent=r.dedEstatal?fmt(r.dedEstatal)+'€':'—';
+    document.getElementById('fn-ded-cam').textContent=r.dedCAM||'—';
+    document.getElementById('fn-cas-est').textContent=r.casEstatal||'—';
+    document.getElementById('fn-cas-cam').textContent=r.casCAM||'—';
+    document.getElementById('fn-total').textContent=r.totalEstimado||'—';
+    document.getElementById('fn-summary').style.display='block';
+
+    const resultEl=document.getElementById('fn-result');
+    resultEl.innerHTML=`<div class="dictamen-block ${r.vigente?'db-ded':'db-par'}">
+      <h4>ANÁLISIS DEL TÍTULO</h4>
+      <div style="font-size:13px;line-height:1.7;color:var(--text2)">${r.analisis||'—'}</div>
+      ${r.alertas&&r.alertas.length?'<div style="margin-top:10px;font-size:12px;color:var(--gold)">⚠️ '+r.alertas.join('<br>⚠️ ')+'</div>':''}
+    </div>`;
+    resultEl.style.display='block';
+    markDirty();
+  }catch(e){
+    document.getElementById('fn-estado').textContent='❌ Error: '+e.message;
+  }
+}
+
+// ═══════════════════════════════════════
+// RESUMEN CONSOLIDADO
+// ═══════════════════════════════════════
+function recalcResumen(){
+  const nombre=document.getElementById('decl-name').value||'—';
+  document.getElementById('rs-nombre').textContent=nombre;
+
+  // Ingresos alquiler
+  const ingBruto=DS.docs.ingresos.filter(d=>d.verdict==='ded'||d.verdict==='par').reduce((s,d)=>s+(d.amount||0),0);
+  // Gastos deducibles (todos)
+  const gasTotal=DS.docs.gastos.filter(d=>d.verdict==='ded').reduce((s,d)=>s+(d.amount||0),0)+
+    DS.docs.gastos.filter(d=>d.verdict==='par').reduce((s,d)=>s+(d.amountParcial||0),0);
+  // Gastos vinculados a inmueble
+  const gasInm=DS.docs.gastos.filter(d=>d.inmueble&&(d.verdict==='ded'||d.verdict==='par')).reduce((s,d)=>s+(d.verdict==='par'?d.amountParcial||0:d.amount||0),0);
+  const neto=ingBruto-gasInm;
+
+  // Educación
+  const edu=DS.docs.gastos.filter(d=>d.type==='educacion'&&d.verdict==='ded').reduce((s,d)=>s+(d.amount||0),0);
+  const eduDed=edu*0.15;
+
+  // Donativos
+  const don=DS.docs.gastos.filter(d=>d.type==='donativo'&&d.verdict==='ded').reduce((s,d)=>s+(d.amount||0),0);
+  const don150=Math.min(don,150)*0.8;
+  const donResto=Math.max(0,don-150)*0.35;
+  const donDed=don150+donResto;
+
+  document.getElementById('rs-ing').textContent=fmt(ingBruto)+'€';
+  document.getElementById('rs-gas').textContent=fmt(gasTotal)+'€';
+  const netoEl=document.getElementById('rs-neto');
+  netoEl.textContent=fmt(neto)+'€';
+  netoEl.style.color=neto>=0?'var(--cyan)':'var(--green)';
+  document.getElementById('rs-fn').textContent=DS.fn?DS.fn.totalEstimado||'—':'No analizado';
+  document.getElementById('rs-edu').textContent=eduDed>0?fmt(eduDed)+'€ (15% de '+fmt(edu)+'€)':'0,00€';
+  document.getElementById('rs-don').textContent=donDed>0?fmt(donDed)+'€':'0,00€';
+
+  // Casillas
+  let cas='';
+  if(ingBruto>0) cas+=`<div>• <strong>Casilla 060</strong>: Ingresos íntegros arrendamiento → <span style="color:var(--cyan);font-family:DM Mono,monospace">${fmt(ingBruto)} €</span></div>`;
+  if(gasInm>0) cas+=`<div>• <strong>Casilla 061</strong>: Gastos deducibles inmueble → <span style="color:var(--red);font-family:DM Mono,monospace">-${fmt(gasInm)} €</span></div>`;
+  if(neto!==0) cas+=`<div>• <strong>Casilla 062</strong>: Rendimiento neto capital inmobiliario → <span style="font-family:DM Mono,monospace">${fmt(neto)} €</span></div>`;
+  if(DS.fn&&DS.fn.dedEstatal) cas+=`<div>• <strong>Casilla ${DS.fn.casEstatal||'623'}</strong>: Familia numerosa (estatal) → <span style="color:var(--green);font-family:DM Mono,monospace">${fmt(DS.fn.dedEstatal)} €</span></div>`;
+  if(DS.fn&&DS.fn.dedCAM) cas+=`<div>• <strong>Casilla ${DS.fn.casCAM||'890'}</strong>: Familia numerosa (CAM) → <span style="color:var(--green);font-family:DM Mono,monospace">${DS.fn.dedCAM}</span></div>`;
+  if(eduDed>0) cas+=`<div>• <strong>Casilla 880</strong>: Gastos educativos CAM → <span style="color:var(--green);font-family:DM Mono,monospace">${fmt(eduDed)} €</span></div>`;
+  if(donDed>0) cas+=`<div>• <strong>Casilla 750</strong>: Donativos → <span style="color:var(--green);font-family:DM Mono,monospace">${fmt(donDed)} €</span></div>`;
+
+  // Other deductible docs with casillas
+  const otherCas={};
+  [...DS.docs.gastos,...DS.docs.ingresos].forEach(d=>{
+    if(d.verdict==='ded'&&d.casillas&&d.casillas.length){
+      d.casillas.forEach(c=>{if(!otherCas[c])otherCas[c]={label:docTypeLabel(d.type),amount:0};otherCas[c].amount+=(d.amount||0);});
+    }
+  });
+  Object.entries(otherCas).forEach(([c,v])=>{
+    if(!['060','061','062','623','890','880','750'].includes(c)){
+      cas+=`<div>• <strong>Casilla ${c}</strong>: ${v.label} → <span style="color:var(--cyan);font-family:DM Mono,monospace">${fmt(v.amount)} €</span></div>`;
+    }
+  });
+
+  document.getElementById('rs-casillas').innerHTML=cas||'<span style="color:var(--text3)">Sin datos suficientes todavía. Analiza los documentos primero.</span>';
+
+  // Justificantes
+  const justif=[];
+  if(ingBruto>0) justif.push('• Contratos de arrendamiento de todos los inmuebles');
+  if(ingBruto>0) justif.push('• Extractos bancarios o recibos de las rentas cobradas');
+  if(gasInm>0) justif.push('• Facturas originales de todos los gastos deducibles del inmueble');
+  if(DS.docs.gastos.some(d=>d.type==='ibi')) justif.push('• Recibos IBI pagados en 2025');
+  if(DS.docs.gastos.some(d=>d.type==='seguro')) justif.push('• Pólizas y recibos de seguros del inmueble');
+  if(DS.fn) justif.push('• Título de Familia Numerosa vigente (renovado si procede)');
+  if(eduDed>0) justif.push('• Facturas/recibos de gastos educativos (colegio, idiomas, vestuario escolar)');
+  if(donDed>0) justif.push('• Certificados de donativos emitidos por las entidades receptoras');
+  justif.push('• Conservar toda la documentación durante 4 años (plazo de prescripción IRPF)');
+  document.getElementById('rs-justif').innerHTML=justif.join('<br>')||'—';
+}
+
+// ═══════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════
+function exportSession(){
+  const data={
+    v:'1.0',savedAt:new Date().toISOString(),
+    nombre:document.getElementById('decl-name').value,
+    nif:document.getElementById('decl-nif').value,
+    docs:DS.docs,inmuebles:DS.inmuebles,fn:DS.fn
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`IRPF2025_Docs_${(data.nombre||'Declarante').replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setSaveInd('Guardado ✓');
+}
+
+function importSession(input){
+  const file=input.files[0];
+  if(!file) return;
+  const r=new FileReader();
+  r.onload=(e)=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.docs) Object.assign(DS.docs,data.docs);
+      if(data.inmuebles) DS.inmuebles=data.inmuebles;
+      if(data.fn) DS.fn=data.fn;
+      if(data.nombre) document.getElementById('decl-name').value=data.nombre;
+      if(data.nif) document.getElementById('decl-nif').value=data.nif;
+      updateInmuebleSelects();
+      renderDocList('gastos');
+      renderDocList('ingresos');
+      renderInmuebles();
+      setSaveInd('Sesión cargada ✓');
+    }catch(err){alert('Error al cargar: '+err.message);}
+  };
+  r.readAsText(file);
+}
+
+function exportReport(){
+  recalcResumen();
+  const nombre=document.getElementById('decl-name').value||'Declarante';
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Informe Fiscal Documental · ${nombre}</title>
+<style>body{font-family:sans-serif;max-width:900px;margin:0 auto;padding:20px;color:#1a1a2e}
+h1{color:#003087;font-size:22px;border-bottom:2px solid #003087;padding-bottom:8px}
+h2{color:#003087;font-size:15px;margin-top:24px;border-left:4px solid #003087;padding-left:10px}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px}
+th{background:#003087;color:#fff;padding:6px 10px;text-align:left}
+td{padding:5px 10px;border-bottom:1px solid #ddd}
+.v-ded{color:#1a7a4a;font-weight:700}.v-no{color:#c00;font-weight:700}.v-par{color:#e05000;font-weight:700}.v-rev{color:#6030a0}
+.total{background:#e8f0fe;font-weight:700}
+</style></head><body>
+<h1>Informe Fiscal Documental · IRPF 2025<br><span style="font-size:14px;font-weight:400">${nombre} · ${document.getElementById('decl-nif').value||''} · Comunidad de Madrid</span></h1>
+<p style="font-size:11px;color:#666">Generado: ${new Date().toLocaleString('es-ES')} · Campaña Renta 2025 (presentación 8 abr – 30 jun 2026)</p>
+<h2>GASTOS DEDUCIBLES (${DS.docs.gastos.filter(d=>d.status==='done').length} docs)</h2>
+<table><tr><th>Documento</th><th>Tipo</th><th>Dictamen</th><th>Importe (€)</th><th>Casilla</th></tr>
+${DS.docs.gastos.map(d=>`<tr><td>${d.name}</td><td>${docTypeLabel(d.type)}</td><td class="v-${d.verdict}">${{ded:'✅ Deducible',no:'❌ No deducible',par:'⚠️ Parcial',rev:'🔍 Revisar'}[d.verdict]||'—'}</td><td style="text-align:right">${d.verdict==='par'?fmt(d.amountParcial||0):fmt(d.amount||0)}</td><td style="font-family:monospace">${(d.casillas||[]).join(', ')||'—'}</td></tr>`).join('')}
+<tr class="total"><td colspan="3">TOTAL DEDUCIBLE</td><td style="text-align:right">${document.getElementById('sg-total').textContent}</td><td></td></tr></table>
+<h2>INGRESOS ARRENDAMIENTO (${DS.docs.ingresos.filter(d=>d.status==='done').length} docs)</h2>
+<table><tr><th>Documento</th><th>Tipo</th><th>Dictamen</th><th>Importe (€)</th><th>Casilla</th></tr>
+${DS.docs.ingresos.map(d=>`<tr><td>${d.name}</td><td>${docTypeLabel(d.type)}</td><td class="v-${d.verdict}">${{ded:'✅ Computable',no:'⭕ Exento/no sujeto',par:'⚠️ Parcial',rev:'🔍 Revisar'}[d.verdict]||'—'}</td><td style="text-align:right">${fmt(d.amount||0)}</td><td style="font-family:monospace">${(d.casillas||[]).join(', ')||'—'}</td></tr>`).join('')}
+</table>
+${DS.fn?`<h2>FAMILIA NUMEROSA</h2><table><tr><th>Categoría</th><th>Deducción Estatal</th><th>Deducción CAM</th><th>Cas. Estatal</th><th>Cas. CAM</th></tr><tr><td>${DS.fn.categoria}</td><td>${fmt(DS.fn.dedEstatal||0)}€</td><td>${DS.fn.dedCAM||'—'}</td><td style="font-family:monospace">${DS.fn.casEstatal||'623'}</td><td style="font-family:monospace">${DS.fn.casCAM||'890'}</td></tr></table>`:''}
+<h2>CASILLAS MODELO 100</h2><div style="font-size:12px;line-height:2">${document.getElementById('rs-casillas').innerHTML}</div>
+<h2>DOCUMENTACIÓN A CONSERVAR</h2><div style="font-size:12px;line-height:2">${document.getElementById('rs-justif').innerHTML}</div>
+<p style="margin-top:24px;font-size:10px;color:#999;border-top:1px solid #ddd;padding-top:10px">Documento informativo generado por IA para uso privado. No constituye asesoría fiscal oficial. La presentación de la declaración es responsabilidad del contribuyente.</p>
+</body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),400);
+}
+
+function sendToMainApp(){
+  alert('Guarda la sesión con "Guardar" y cárgala desde la app principal pulsando "📂 Cargar sesión" en el panel del declarante correspondiente.');
+}
+
+// ═══════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════
+const SKEY='irpf2025_docs_v1';
+function markDirty(){
+  setSaveInd('Sin guardar ·');
+  clearTimeout(saveT);
+  saveT=setTimeout(()=>{
+    try{
+      localStorage.setItem(SKEY,JSON.stringify({
+        nombre:document.getElementById('decl-name').value,
+        nif:document.getElementById('decl-nif').value,
+        docs:DS.docs,inmuebles:DS.inmuebles,fn:DS.fn,savedAt:new Date().toISOString()
+      }));
+      setSaveInd('Auto-guardado '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}));
+    }catch(e){}
+  },1500);
+}
+
+function setSaveInd(txt){
+  const el=document.getElementById('autosave-ind');
+  if(el) el.textContent=txt;
+}
+
+function autoLoad(){
+  try{
+    const raw=localStorage.getItem(SKEY);
+    if(!raw) return;
+    const data=JSON.parse(raw);
+    if(data.docs) Object.assign(DS.docs,data.docs);
+    if(data.inmuebles) DS.inmuebles=data.inmuebles;
+    if(data.fn) DS.fn=data.fn;
+    if(data.nombre) document.getElementById('decl-name').value=data.nombre;
+    if(data.nif) document.getElementById('decl-nif').value=data.nif;
+    updateInmuebleSelects();
+    renderDocList('gastos');
+    renderDocList('ingresos');
+    renderInmuebles();
+    if(DS.fn){
+      document.getElementById('fn-cat').textContent=DS.fn.categoria||'—';
+      document.getElementById('fn-hijos').textContent=DS.fn.numHijos||'—';
+      document.getElementById('fn-estado').textContent=DS.fn.vigente?'✅ Vigente':'⚠️ Verificar';
+      document.getElementById('fn-summary').style.display='block';
+      document.getElementById('fn-ded-estatal').textContent=DS.fn.dedEstatal?fmt(DS.fn.dedEstatal)+'€':'—';
+      document.getElementById('fn-ded-cam').textContent=DS.fn.dedCAM||'—';
+      document.getElementById('fn-cas-est').textContent=DS.fn.casEstatal||'—';
+      document.getElementById('fn-cas-cam').textContent=DS.fn.casCAM||'—';
+      document.getElementById('fn-total').textContent=DS.fn.totalEstimado||'—';
+    }
+    if(data.savedAt) setSaveInd('Sesión: '+new Date(data.savedAt).toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}));
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function fmt(n){return Number(n||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}
+
+
+// ── SERVER HEALTH CHECK ──
+async function checkServer(){
+  const dot=document.getElementById('api-dot');
+  const lbl=document.getElementById('server-status');
+  if(!dot||!lbl) return;
+  try{
+    const r=await fetch('http://localhost:3001/health',{signal:AbortSignal.timeout(3000)});
+    const d=await r.json();
+    if(d.status==='ok'&&d.key_loaded){
+      dot.style.background='#1fd98a'; lbl.textContent='Conectado ✓'; lbl.style.color='#1fd98a';
+    } else {
+      dot.style.background='#e8b84b'; lbl.textContent='Sin API key en .env'; lbl.style.color='#e8b84b';
+    }
+  }catch(e){
+    dot.style.background='#f0566a'; lbl.textContent='Servidor apagado — ver README'; lbl.style.color='#f0566a';
+  }
+}
+
+// ═══════════════════════════════════════
+// API KEY PERSISTENCE
+// ═══════════════════════════════════════
+function persistApiKey(v){
+  if(v&&v.startsWith('sk-ant-')){
+    localStorage.setItem('irpf2025_apikey',v);
+    const dot=document.getElementById('api-dot');
+    if(dot) dot.style.background='#1fd98a';
+  }
+}
+
+function loadApiKey(){
+  const k=localStorage.getItem('irpf2025_apikey');
+  if(k){
+    const inp=document.getElementById('api-key');
+    if(inp) inp.value=k;
+    const dot=document.getElementById('api-dot');
+    if(dot) dot.style.background='#1fd98a';
+  }
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+checkServer();
+autoLoad();
+</script>
+</body>
+</html>
