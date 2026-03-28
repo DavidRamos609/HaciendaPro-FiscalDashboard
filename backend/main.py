@@ -4,13 +4,30 @@ Arranca con: uvicorn main:app --reload --port 3001
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import httpx, os
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
 app = FastAPI(title="IRPF 2025 API Proxy")
+
+# Montar directorio para archivos estáticos
+app.mount("/static", StaticFiles(directory="/app"), name="static")
+
+# Rutas para los HTML
+@app.get("/irpf2025_familia.html")
+async def familia():
+    return FileResponse("/app/irpf2025_familia.html")
+
+@app.get("/irpf2025_documentos.html")
+async def documentos():
+    return FileResponse("/app/irpf2025_documentos.html")
+
+@app.get("/")
+async def root():
+    return FileResponse("/app/irpf2025_familia.html")
 
 app.add_middleware(
     CORSMiddleware,
